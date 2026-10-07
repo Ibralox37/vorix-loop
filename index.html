@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<title>Vorix Loop – ein Spiel von VORIX</title>
+<meta name="description" content="Vorix Loop von VORIX: Zieh mit deinem Kometen Kreise um die Gegner und fang sie ein. Je mehr in einem Kreis, desto mehr Punkte! Mit Wellen, Bossen und Skins. Kostenlos im Browser und auf dem Handy.">
+<link rel="canonical" href="https://ibralox37.github.io/vorix-loop/">
+<meta property="og:site_name" content="VORIX – WE CREATE GAMES">
+<meta property="og:title" content="Vorix Loop – ein Spiel von VORIX">
+<meta property="og:description" content="Zieh Kreise, fang sie alle! Das neue Neon-Spiel von VORIX mit Combos, Bossen und Skins. Kostenlos.">
+<meta property="og:image" content="https://ibralox37.github.io/vorix-loop/icon-512.png">
+<meta property="og:url" content="https://ibralox37.github.io/vorix-loop/">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Vorix Loop",
+  "url": "https://ibralox37.github.io/vorix-loop/",
+  "description": "Zieh mit deinem Kometen Kreise um die Gegner und fang sie ein. Je mehr in einem Kreis, desto mehr Punkte.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Web",
+  "inLanguage": "de",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+  "publisher": { "@type": "Organization", "name": "VORIX – WE CREATE GAMES", "url": "https://ibralox37.github.io/" }
+}
+</script>
+<meta name="theme-color" content="#07101c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Loop">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
+<style>
+/* Design „Vorix Blau" – wie Timer Challenge, Spotter und Jump over the Wall */
+:root { --c-btn: #07518a; --c-accent: #00aaff; --orbitron: "Orbitron", "Rajdhani", Arial, sans-serif; --rajdhani: "Rajdhani", "Segoe UI", Arial, sans-serif; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #060d18; color: #fff; font-family: var(--rajdhani); touch-action: none; overscroll-behavior: none; }
+#spiel { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+#sat { position: fixed; top: 0; left: 0; width: 0; height: env(safe-area-inset-top); visibility: hidden; pointer-events: none; }
+.versteckt { display: none !important; }
+.ebene { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)); }
+.ebene.dunkel { background: rgba(4, 8, 16, .62); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.panel { width: min(92vw, 420px); max-height: 92vh; overflow-y: auto; touch-action: pan-y; text-align: center; padding: 24px 22px 20px; border-radius: 24px; border: 1px solid rgba(255,255,255,.13);
+  background: linear-gradient(160deg, rgba(27,41,66,.94), rgba(17,26,43,.94)); box-shadow: 0 28px 80px rgba(0,0,0,.6), 0 0 40px rgba(0,136,255,.15); animation: rein .3s cubic-bezier(.2,1.3,.4,1); }
+.panel { scrollbar-width: none; } .panel::-webkit-scrollbar { display: none; }
+@keyframes rein { 0% { opacity: 0; transform: scale(.85) translateY(14px); } 100% { opacity: 1; transform: none; } }
+.menue-panel { background: none; border: 0; box-shadow: none; }
+.menue-panel .btn.sub { background: rgba(18,30,50,.94); }   /* fest statt durchsichtig: der Komet im Hintergrund verschwindet sauber dahinter */
+#logo { width: min(300px, 64vw); filter: drop-shadow(0 2px 18px rgba(0,110,220,.35)); animation: schweben 3.4s ease-in-out infinite; }
+@keyframes schweben { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+.titel { font-family: var(--orbitron); font-weight: 900; font-size: clamp(32px, 10vw, 50px); line-height: 1.05; letter-spacing: 5px; margin: 6px 0 6px;
+  color: #fff; text-shadow: 0 0 10px #00aaff, 0 0 26px #00aaff, 0 0 52px #0055ff; }
+.unter { opacity: .8; font-size: 18px; margin: 0 0 10px; }
+.werte { font-family: var(--orbitron); font-size: 14px; letter-spacing: 1px; opacity: .85; margin-bottom: 14px; }
+.knoepfe { display: flex; flex-direction: column; gap: 10px; width: min(88vw, 320px); margin: 0 auto; }
+.reihe { display: flex; gap: 10px; } .reihe .btn { flex: 1; }
+.btn { display: block; width: 100%; padding: 15px 10px; border: 0; border-radius: 16px; color: #fff; font-family: var(--orbitron); font-size: 15px; font-weight: 700; letter-spacing: 1.2px; cursor: pointer; transition: filter .15s, transform .1s; }
+.btn:hover { filter: brightness(1.15); } .btn:active { transform: scale(.97); }
+.btn.play { padding: 19px 10px; font-size: 20px; background: linear-gradient(90deg, var(--c-btn), var(--c-accent)); box-shadow: 0 12px 34px rgba(0,0,0,.5); }
+.btn.sub { background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.13); font-size: 13px; }
+.gross-zahl { font-family: var(--orbitron); font-weight: 900; font-size: 64px; line-height: 1; margin: 6px 0; text-shadow: 0 0 18px rgba(0,170,255,.6); }
+.panel h2 { font-family: var(--orbitron); margin: 0 0 4px; font-size: 24px; letter-spacing: 2px; }
+.info { opacity: .8; font-size: 16px; line-height: 1.4; margin: 6px 0 14px; }
+.abzeichen { display: inline-block; padding: 4px 12px; border-radius: 20px; font-family: var(--orbitron); font-size: 12px; font-weight: 900; letter-spacing: 1px; margin: 4px 0 8px;
+  background: linear-gradient(90deg, #8a6a12, #ffd24a); box-shadow: 0 0 14px rgba(255,210,74,.5); }
+.balken { height: 10px; border-radius: 6px; background: rgba(255,255,255,.12); overflow: hidden; margin: 6px auto 4px; max-width: 280px; }
+.balken div { height: 100%; background: linear-gradient(90deg, var(--c-btn), var(--c-accent)); box-shadow: 0 0 12px var(--c-accent); border-radius: 6px; }
+.tipp { font-size: 13px; opacity: .55; margin-top: 12px; }
+.skin-raster { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0 16px; }
+.skin { border-radius: 16px; padding: 10px 4px 8px; background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.1); color: #fff; font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
+.skin canvas { width: 56px; height: 56px; display: block; margin: 0 auto 4px; }
+.skin.an { border-color: var(--c-accent); box-shadow: 0 0 14px rgba(0,170,255,.5); }
+.skin.zu { opacity: .5; cursor: default; }
+.skin small { display: block; font-size: 11px; opacity: .7; font-weight: 600; }
+.links { text-align: left; }
+.links p { margin: 0 0 9px; line-height: 1.4; opacity: .9; }
+.gegner-liste { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; text-align: left; margin: 2px 0 12px; font-size: 15px; line-height: 1.3; }
+.gegner-liste span:nth-child(odd) { font-size: 18px; }
+#pause-knopf { position: fixed; z-index: 5; top: calc(12px + env(safe-area-inset-top)); right: 12px; width: 48px; height: 48px; border-radius: 14px; border: 1px solid rgba(255,255,255,.14);
+  background: rgba(7,81,138,.85); color: #fff; font-family: var(--orbitron); font-weight: 900; font-size: 16px; cursor: pointer; }
+.fuss { margin-top: 14px; font-family: var(--orbitron); font-size: 10px; letter-spacing: 1px; opacity: .45; }
+/* Vorix-Konto: Knopf oben links im Menü und das Anmelde-Fenster (wie in Jump over the Wall) */
+.konto-knopf { position: absolute; z-index: 2; top: calc(12px + env(safe-area-inset-top)); left: 12px; max-width: 46vw; padding: 10px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.14);
+  background: rgba(7,81,138,.85); color: #fff; font-family: var(--orbitron); font-size: 12px; font-weight: 700; letter-spacing: 1px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.konto-knopf.an { background: rgba(10,60,40,.9); border-color: rgba(47,207,120,.55); }
+.feld-label { display: block; text-align: left; font-family: var(--orbitron); font-size: 11px; letter-spacing: 1.5px; opacity: .7; margin: 10px 2px 5px; }
+.feld { display: block; width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.18); background: rgba(0,0,0,.3); color: #fff;
+  font-family: var(--rajdhani); font-size: 17px; font-weight: 600; outline: none; user-select: text; -webkit-user-select: text; }
+.feld:focus { border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(0,170,255,.2); }
+.fehler-text { min-height: 20px; color: #ff8a9a; font-size: 15px; font-weight: 600; line-height: 1.3; margin: 8px 0 4px; }
+.link-knopf { background: none; border: 0; padding: 0; color: var(--c-accent); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.konto-name { font-family: var(--orbitron); font-weight: 900; font-size: 22px; letter-spacing: 1px; margin: 4px 0 2px; word-break: break-all; }
+.konto-link-zeile { font-size: 13px; opacity: .8; margin-top: 12px; }
+/* Flache Bildschirme (Handy quer): alles etwas kompakter */
+@media (max-height: 640px) {
+  #logo { width: min(170px, 36vw); }
+  .titel { font-size: clamp(22px, 7vh, 36px); margin: 0 0 2px; }
+  .unter { font-size: 15px; margin: 0 0 4px; }
+  .werte { margin-bottom: 8px; font-size: 12px; }
+  .knoepfe { gap: 7px; }
+  .btn { padding: 10px; font-size: 12px; } .btn.play { padding: 13px 10px; font-size: 17px; }
+  .gross-zahl { font-size: 44px; }
+  .panel { padding: 16px 18px 14px; }
+  .info { margin: 4px 0 8px; font-size: 15px; }
+  .fuss { display: none; }
+  .skin canvas { width: 40px; height: 40px; }
+  .feld { padding: 9px 12px; font-size: 16px; } .feld-label { margin: 6px 2px 4px; }
+  .konto-text { display: none; } .konto-link-zeile { margin-top: 8px; } .fehler-text { min-height: 6px; margin: 4px 0 2px; }
+}
+@media (max-height: 440px) { #logo { display: none; } .tipp { display: none; } }
+@media (orientation: portrait) and (max-width: 600px) { .menue-panel { margin-bottom: 8vh; } .fuss { display: none; } }
+</style>
+</head>
+<body>
+<canvas id="spiel"></canvas>
+<div id="sat"></div>
+<button id="pause-knopf" class="versteckt" aria-label="Pause">II</button>
+
+<!-- Startbildschirm -->
+<div id="menue" class="ebene">
+  <button id="konto-knopf" class="konto-knopf">👤 ANMELDEN</button>
+  <div class="panel menue-panel">
+    <img id="logo" src="vorix-logo-hell.png" alt="VORIX – WE CREATE GAMES">
+    <div class="titel">VORIX LOOP</div>
+    <p class="unter">Zieh Kreise. Fang sie alle.</p>
+    <div class="werte" id="menue-werte"></div>
+    <div class="knoepfe">
+      <button class="btn play" id="k-spielen">▶ SPIELEN</button>
+      <div class="reihe"><button class="btn sub" id="k-skins">🎨 SKINS</button><button class="btn sub" id="k-hilfe">❓ SO GEHT'S</button></div>
+      <div class="reihe"><button class="btn sub" id="k-ton"></button><button class="btn sub" id="k-musik"></button></div>
+    </div>
+    <div class="fuss">© 2026 VORIX – WE CREATE GAMES</div>
+  </div>
+</div>
+
+<!-- Game Over -->
+<div id="gameover" class="ebene dunkel versteckt">
+  <div class="panel">
+    <h2 id="go-titel">AUTSCH!</h2>
+    <div class="gross-zahl" id="go-punkte">0</div>
+    <div id="go-rekord" class="abzeichen versteckt">🏆 NEUER REKORD!</div>
+    <div class="info" id="go-info"></div>
+    <div class="balken" id="go-balken-rahmen"><div id="go-balken" style="width:0%"></div></div>
+    <div class="info" id="go-skin" style="margin-top:10px"></div>
+    <div class="knoepfe"><button class="btn play" id="k-nochmal">↻ NOCHMAL</button><button class="btn sub" id="k-go-menue">☰ MENÜ</button></div>
+    <div class="tipp">Am PC: Leertaste = sofort nochmal</div>
+  </div>
+</div>
+
+<!-- Sieg -->
+<div id="sieg" class="ebene dunkel versteckt">
+  <div class="panel">
+    <div style="font-size:54px;line-height:1">🏆</div>
+    <h2>GESCHAFFT!</h2>
+    <div class="info" id="sieg-info"></div>
+    <div class="abzeichen">✨ GOLD-SKIN FREIGESCHALTET</div>
+    <div class="knoepfe" style="margin-top:12px"><button class="btn play" id="k-endlos">♾️ ENDLOS WEITER</button><button class="btn sub" id="k-sieg-menue">☰ MENÜ</button></div>
+    <div class="tipp">Im Endlos-Modus kommen immer mehr Gegner. Wie weit kommst du?</div>
+  </div>
+</div>
+
+<!-- Pause -->
+<div id="pause" class="ebene dunkel versteckt">
+  <div class="panel">
+    <h2>PAUSE</h2>
+    <div class="info" id="pause-info"></div>
+    <div class="knoepfe"><button class="btn play" id="k-weiter">▶ WEITER</button><button class="btn sub" id="k-pause-menue">☰ MENÜ</button></div>
+  </div>
+</div>
+
+<!-- Skins -->
+<div id="skins" class="ebene dunkel versteckt">
+  <div class="panel">
+    <h2>🎨 SKINS</h2>
+    <div class="info" style="margin-bottom:0">Neue Skins bekommst du mit mehr Punkten.</div>
+    <div class="skin-raster" id="skin-raster"></div>
+    <button class="btn sub" id="k-skins-zu">FERTIG</button>
+  </div>
+</div>
+
+<!-- Anleitung -->
+<div id="hilfe" class="ebene dunkel versteckt">
+  <div class="panel">
+    <h2>❓ SO GEHT'S</h2>
+    <div class="links info">
+      <p>👆 <b>Wisch</b> irgendwo über den Bildschirm. Dein Komet macht die Bewegung nach und zieht einen leuchtenden Schweif hinter sich her. Am PC folgt er der <b>Maus</b>.</p>
+      <p>➰ Zieh einen <b>Kreis</b>, bis dein Schweif sich selbst kreuzt. Alles, was im Kreis ist, wird <b>eingefangen</b>!</p>
+      <p>✨ Mehrere Gegner in <b>einem</b> Kreis sind eine <b>Combo</b>: 3 Gegner zählen 3-fach, 5 Gegner 5-fach!</p>
+      <p>💥 Berühr die Gegner nicht mit dem Kopf vom Kometen. Du hast 3 Herzen.</p>
+    </div>
+    <div class="gegner-liste">
+      <span>🔴</span><span><b>Funke</b> – fliegt dir hinterher</span>
+      <span>🔶</span><span><b>Jäger</b> – schnell</span>
+      <span>✂️</span><span><b>Schneider</b> – zerschneidet deinen Schweif</span>
+      <span>🟢</span><span><b>Panzer</b> – braucht zwei Kreise</span>
+      <span>💣</span><span><b>Bombe</b> – einkreisen, dann fliegt alles drumherum mit weg</span>
+      <span>⭐</span><span><b>Stern</b> – harmlos, gibt Bonuspunkte</span>
+      <span>🌀</span><span><b>Boss</b> – alle 5 Wellen. Braucht einen großen Kreis, mehrmals.</span>
+    </div>
+    <div class="links info">
+      <p>🎁 <b>Extras</b> (Zeitlupe, Schild, langer Schweif, Herz): berühren oder einkreisen.</p>
+      <p>🏆 Besiege den <b>Mega-Wirbel</b> in Welle 10, dann hast du gewonnen. Danach geht es endlos weiter.</p>
+      <p>⌨️ Am PC: Maus bewegen (oder Pfeiltasten), P = Pause.</p>
+      <p>👤 Oben links kannst du dich mit deinem <b>Vorix-Konto</b> anmelden, also mit demselben Konto wie in Timer Challenge.</p>
+    </div>
+    <button class="btn sub" id="k-hilfe-zu">VERSTANDEN</button>
+  </div>
+</div>
+
+<!-- Vorix-Konto -->
+<div id="konto" class="ebene dunkel versteckt">
+  <div class="panel">
+    <form id="konto-aus" autocomplete="on">
+      <h2>🔑 VORIX-KONTO</h2>
+      <div class="info konto-text">Melde dich mit deinem Konto von <b>Timer Challenge</b> an. Dein Bestwert und deine Skins bleiben auf diesem Gerät.</div>
+      <label class="feld-label" for="k-name">BENUTZERNAME</label>
+      <input class="feld" id="k-name" name="username" maxlength="20" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <label class="feld-label" for="k-passwort">PASSWORT</label>
+      <input class="feld" id="k-passwort" name="password" type="password" maxlength="72" autocomplete="current-password">
+      <div class="fehler-text" id="k-fehler"></div>
+      <div class="knoepfe"><button type="submit" class="btn play" id="k-anmelden">ANMELDEN</button><button type="button" class="btn sub" id="k-konto-zu">ZURÜCK</button></div>
+      <div class="konto-link-zeile">Noch kein Konto? <button type="button" class="link-knopf" id="k-timer">In Timer Challenge erstellen</button></div>
+    </form>
+    <div id="konto-an" class="versteckt">
+      <h2>👤 VORIX-KONTO</h2>
+      <div class="konto-name" id="k-angemeldet"></div>
+      <div class="info">Du bist angemeldet. Dein Bestwert und deine Skins bleiben auf diesem Gerät.</div>
+      <div class="knoepfe"><button class="btn sub" id="k-konto-fertig">FERTIG</button><button class="btn sub" id="k-abmelden">ABMELDEN</button></div>
+      <div class="tipp">Abmelden gilt nur hier. In Timer Challenge bleibst du angemeldet.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   VORIX LOOP  ·  ein Spiel von VORIX – WE CREATE GAMES
+   Ibos Wunsch am 07.10.2026: „mach ein komplett neues Spiel, das soll es
+   noch nicht geben, mach im Vorix-Design".
+   Die Idee: Du ziehst mit einem Kometen Schleifen. Sobald sich der
+   Schweif selbst kreuzt, wird alles im Kreis eingefangen.
+   ===================================================================== */
+
+/* ---------------- Speicher (alle Namen beginnen mit vorixLoop, NIE kronix…) ---------------- */
+const LS = 'vorixLoop';
+const daten = Object.assign({ best: 0, besteWelle: 0, besteCombo: 0, spiele: 0, loops: 0, siege: 0, skin: 'neon', ton: true, musik: true }, (() => {
+  try { const d = JSON.parse(localStorage.getItem(LS) || '{}'); return d && typeof d === 'object' ? d : {}; } catch (e) { return {}; }
+})());
+function sichern() { try { localStorage.setItem(LS, JSON.stringify(daten)); } catch (e) { /* egal */ } }
+
+/* ---------------- Spielwerte ----------------
+   Alles wird in „U" gemessen: 1 U = 1 % der kurzen Bildschirmseite.
+   So ist das Spiel auf dem Handy und am PC gleich groß. */
+const ZIEL_WELLE = 10;                  // den Mega-Wirbel in Welle 10 besiegen = gewonnen
+const HERZEN_START = 3, HERZEN_MAX = 5;
+const KOPF = 2.3;                       // Größe vom Kometen-Kopf
+const KOMET_TEMPO = 260;                // so schnell kann der Komet höchstens fliegen (U pro Sekunde)
+const TASTEN_TEMPO = 85;                // mit den Pfeiltasten
+const FINGER_FAKTOR = 1.35;             // Wischen auf dem Handy: der Komet fliegt etwas weiter als der Finger
+const SCHWEIF_LAENGE = 240, SCHWEIF_ALTER = 3.2, PUNKT_ABSTAND = 1.1;
+const MIN_FLAECHE = 30;                 // kleinere Schleifen zählen nicht (Fingerzittern)
+const BOMBEN_RADIUS = 20;
+
+const TYPEN = {
+  funke:     { r: 2.6, tempo: 13, punkte: 1,  farbe: '#ff4f6d' },
+  jaeger:    { r: 2.3, tempo: 22, punkte: 2,  farbe: '#ff8c42' },
+  schneider: { r: 2.8, tempo: 20, punkte: 3,  farbe: '#e9f6ff' },
+  panzer:    { r: 3.1, tempo: 11, punkte: 3,  farbe: '#2fcf78' },
+  bombe:     { r: 2.7, tempo: 7,  punkte: 2,  farbe: '#ff4fd8' },
+  stern:     { r: 2.4, tempo: 9,  punkte: 5,  farbe: '#ffd24a' },
+  boss:      { r: 8,   tempo: 8,  punkte: 10, farbe: '#ff3b5c' },
+};
+const HINWEISE = {
+  stern: '⭐ Sterne sind harmlos. Einkreisen gibt 5 Bonuspunkte!',
+  jaeger: '🔶 Jäger sind schnell – pass auf!',
+  schneider: '✂️ Schneider zerschneiden deinen Schweif!',
+  panzer: '🟢 Panzer brauchen ZWEI Kreise: erst das Schild, dann den Panzer.',
+  bombe: '💣 Kreis die Bombe ein – sie sprengt alles um sich herum weg!',
+  boss: '🌀 Zieh einen GROSSEN Kreis ganz um den Boss herum!',
+};
+const EXTRAS = {
+  zeit:    { zeichen: '⏱️', farbe: '#00e5ff', text: 'ZEITLUPE!' },
+  schild:  { zeichen: '🛡️', farbe: '#2fcf78', text: 'SCHILD!' },
+  schweif: { zeichen: '➰', farbe: '#b05cff', text: 'LANGER SCHWEIF!' },
+  herz:    { zeichen: '❤️', farbe: '#ff4f6d', text: '+1 HERZ!' },
+};
+const SKINS = [
+  { id: 'neon',        name: 'Neon',        ab: 0,   farbe: '#00aaff', farbe2: '#7a5cff' },
+  { id: 'lila',        name: 'Lila Blitz',  ab: 60,  farbe: '#c77dff', farbe2: '#ff4fd8' },
+  { id: 'pfannkuchen', name: 'Pfannkuchen', ab: 150, farbe: '#ffb347', farbe2: '#ffe08a' },
+  { id: 'feuer',       name: 'Feuer',       ab: 300, farbe: '#ff7a1f', farbe2: '#ff2a00' },
+  { id: 'vorix',       name: 'Vorix X',     ab: 600, farbe: '#00d4ff', farbe2: '#0066ff' },
+  { id: 'gold',        name: 'Gold',        ab: 0,   farbe: '#ffd24a', farbe2: '#fff1b8', nurSieg: true },
+];
+const WELTEN = [   // alle 5 Wellen eine neue Farbe
+  { haupt: '#00aaff', bg: ['#040a14', '#0d2747'] },
+  { haupt: '#b05cff', bg: ['#08040f', '#2a0d47'] },
+  { haupt: '#ff4fd8', bg: ['#10040c', '#470d3a'] },
+  { haupt: '#ffd24a', bg: ['#0f0a03', '#47300d'] },
+];
+function skinFrei(s) { return s.nurSieg ? daten.siege > 0 : daten.best >= s.ab; }
+function aktuellerSkin() { const s = SKINS.find(k => k.id === daten.skin); return s && skinFrei(s) ? s : SKINS[0]; }
+
+/* ---------------- Hilfsfunktionen ---------------- */
+const $ = id => document.getElementById(id);
+const klemm = (v, a, b) => Math.max(a, Math.min(b, v));
+const zufall = (a, b) => a + Math.random() * (b - a);
+const ZWEI_PI = Math.PI * 2;
+const hexRgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+for (const s of SKINS) { s.rgbHinten = hexRgb(s.farbe2); s.rgbVorne = hexRgb(s.farbe); }
+function mischFarbe(skin, t) {
+  const a = skin.rgbHinten, b = skin.rgbVorne;
+  return `rgb(${Math.round(a[0] + (b[0] - a[0]) * t)},${Math.round(a[1] + (b[1] - a[1]) * t)},${Math.round(a[2] + (b[2] - a[2]) * t)})`;
+}
+// Schneiden sich die Strecken A–B und C–D? Dann kommt der Schnittpunkt zurück.
+function schnitt(ax, ay, bx, by, cx, cy, dx, dy) {
+  const rx = bx - ax, ry = by - ay, sx = dx - cx, sy = dy - cy;
+  const nenner = rx * sy - ry * sx;
+  if (Math.abs(nenner) < 1e-9) return null;
+  const qx = cx - ax, qy = cy - ay;
+  const t = (qx * sy - qy * sx) / nenner, u = (qx * ry - qy * rx) / nenner;
+  if (t < 0 || t > 1 || u < 0 || u > 1) return null;
+  return { x: ax + t * rx, y: ay + t * ry };
+}
+// Liegt der Punkt in der Schleife?
+function inSchleife(x, y, poly) {
+  let drin = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const a = poly[i], b = poly[j];
+    if ((a.y > y) !== (b.y > y) && x < (b.x - a.x) * (y - a.y) / (b.y - a.y) + a.x) drin = !drin;
+  }
+  return drin;
+}
+function flaeche(poly) {
+  let s = 0;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) s += (poly[j].x + poly[i].x) * (poly[j].y - poly[i].y);
+  return Math.abs(s / 2);
+}
+function mitte(poly) { let x = 0, y = 0; for (const p of poly) { x += p.x; y += p.y; } return { x: x / poly.length, y: y / poly.length }; }
+
+/* ---------------- Zustand ---------------- */
+let zustand = 'menue';      // menue | spiel | pause | tot | sieg
+let kom = { x: 50, y: 50, zx: 50, zy: 50, winkel: 0, tempo: 0, unverwundbar: 0, schild: false };
+let schweif = [], gegner = [], extras = [], teile = [], texte = [], flaechen = [], kreuze = [];
+let punkte = 0, welle = 0, herzen = HERZEN_START, endlos = false, siegGeschafft = false, besteComboRunde = 0;
+let wellePhase = 'aus', welleZeit = 0, plan = [], pauseZeit = 0;
+let zeitlupe = 0, langSchweif = 0, wackeln = 0, blitz = 0, blitzFarbe = '255,255,255', banner = null, hinweis = null;
+let spielzeit = 0, uhr = 0, rekordAlt = 0, totZeit = 0, welt = WELTEN[0], demoTimer = 0;
+let gesehen = new Set();
+let autoSpiel = false;      // nur zum Testen: dann spielt der Computer selbst
+const bot = { ziel: null, w: 0, dreh: 0 };
+const tasten = new Set();
+let finger = null;          // der Finger, der gerade den Kometen steuert
+
+/* ---------------- Bildschirm ---------------- */
+const cv = $('spiel');
+const ctx = cv.getContext('2d');
+let W = 0, H = 0, U = 4, AW = 100, AH = 100, OBEN = 12;
+function groesse() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  U = Math.min(W, H) / 100; AW = W / U; AH = H / U;
+  OBEN = 12 + ($('sat').offsetHeight || 0);          // Platz für die iPhone-Kamera
+  // Nach dem Drehen vom Handy: alles ins Spielfeld zurückholen
+  kom.x = klemm(kom.x, KOPF, AW - KOPF); kom.y = klemm(kom.y, KOPF, AH - KOPF);
+  kom.zx = kom.x; kom.zy = kom.y;
+  for (const g of gegner) { g.x = klemm(g.x, g.r, AW - g.r); g.y = klemm(g.y, g.r, AH - g.r); }
+  for (const e of extras) { e.x = klemm(e.x, 4, AW - 4); e.y = klemm(e.y, 4, AH - 4); }
+  schweif = [];
+}
+groesse();
+window.addEventListener('resize', groesse);
+kom.x = kom.zx = AW / 2; kom.y = kom.zy = AH / 2;
+const sterne = Array.from({ length: 90 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 1.5 + 0.4, v: 0.5 + Math.random() * 2, p: Math.random() * 6 }));
+
+/* ---------------- Töne und Musik (werden direkt erzeugt, keine Dateien) ---------------- */
+let ac = null, musikTimer = null, naechsterSchlag = 0, schlagNr = 0;
+function audio() {
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+  } catch (e) { ac = null; }
+  return ac;
+}
+function piep(f, d, typ = 'square', vol = 0.07, start = 0, f2 = 0) {
+  if (!daten.ton) return; const c = audio(); if (!c) return;
+  const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + start;
+  o.type = typ; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  o.connect(g).connect(c.destination); o.start(t); o.stop(t + d + 0.05);
+}
+function rauschen(d, vol, start = 0, hoch = 0) {
+  if (!daten.ton) return; const c = audio(); if (!c) return;
+  const n = Math.floor(c.sampleRate * d), buf = c.createBuffer(1, n, c.sampleRate), z = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) z[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  const q = c.createBufferSource(), g = c.createGain(); q.buffer = buf; g.gain.value = vol;
+  if (hoch) { const f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = hoch; q.connect(f); f.connect(g); } else q.connect(g);
+  g.connect(c.destination); q.start(c.currentTime + start);
+}
+const NOTEN = [523, 659, 784, 1047, 1319, 1568, 2093];
+const TON = {
+  schleife:    n => { for (let i = 0; i < Math.min(n, 7); i++) piep(NOTEN[i], 0.16, 'triangle', 0.06, i * 0.055); if (n >= 5) rauschen(0.3, 0.05, 0.1, 3000); },
+  leer:        () => piep(640, 0.08, 'sine', 0.035, 0, 960),
+  stern:       () => [1568, 2093].forEach((f, i) => piep(f, 0.1, 'triangle', 0.045, i * 0.05)),
+  schild:      () => piep(900, 0.2, 'square', 0.04, 0, 300),
+  panzer:      () => piep(1200, 0.08, 'square', 0.04, 0, 700),
+  autsch:      () => { rauschen(0.25, 0.14); piep(220, 0.32, 'sawtooth', 0.06, 0, 70); },
+  extra:       () => [988, 1319, 1760].forEach((f, i) => piep(f, 0.1, 'sine', 0.05, i * 0.06)),
+  welle:       () => [523, 659, 784, 1047].forEach((f, i) => piep(f, 0.18, 'triangle', 0.06, i * 0.08)),
+  boss:        () => [0, 0.36].forEach(s => piep(196, 0.3, 'sawtooth', 0.06, s, 140)),
+  bossTreffer: () => { rauschen(0.18, 0.12); piep(170, 0.22, 'square', 0.06, 0, 80); },
+  bossTot:     () => { rauschen(0.8, 0.2); [1047, 784, 659, 523].forEach((f, i) => piep(f, 0.25, 'triangle', 0.06, 0.1 + i * 0.1)); },
+  bumm:        () => { rauschen(0.45, 0.2); piep(90, 0.4, 'sine', 0.12, 0, 40); },
+  schnitt:     () => rauschen(0.12, 0.08, 0, 4000),
+  tot:         () => { rauschen(0.4, 0.18); piep(180, 0.5, 'sawtooth', 0.07, 0, 50); },
+  sieg:        () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => piep(f, 0.24, 'triangle', 0.07, i * 0.12)),
+  skin:        () => [880, 1175, 1568].forEach((f, i) => piep(f, 0.12, 'sine', 0.05, i * 0.07)),
+};
+// Kleine Musik: Bass, Kick, Hi-Hat und ein leises Glitzern, 120 Schläge pro Minute
+const ACHTEL = 60 / 120 / 2;
+const BASS = [55, 65.41, 73.42, 49];
+const GLITZER = [880, 1047, 1319, 1047];
+function musikStart() {
+  if (!daten.musik || musikTimer) return;
+  const c = audio(); if (!c) return;
+  naechsterSchlag = c.currentTime + 0.08; schlagNr = 0;
+  musikTimer = setInterval(() => {
+    if (!ac) return;
+    while (naechsterSchlag < ac.currentTime + 0.15) { schlag(naechsterSchlag, schlagNr); naechsterSchlag += ACHTEL; schlagNr++; }
+  }, 40);
+}
+function musikStopp() { if (musikTimer) { clearInterval(musikTimer); musikTimer = null; } }
+function schlag(t, n) {
+  const c = ac, s = n % 8, lauter = Math.min(1, 0.6 + welle / 20);
+  if (s === 0 || s === 4) {        // Kick
+    const o = c.createOscillator(), g = c.createGain();
+    o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.12);
+    g.gain.setValueAtTime(0.12 * lauter, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.2);
+  }
+  if (s % 2 === 1) {               // Hi-Hat
+    const n2 = Math.floor(c.sampleRate * 0.04), buf = c.createBuffer(1, n2, c.sampleRate), z = buf.getChannelData(0);
+    for (let i = 0; i < n2; i++) z[i] = (Math.random() * 2 - 1) * (1 - i / n2);
+    const q = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    q.buffer = buf; f.type = 'highpass'; f.frequency.value = 7000; g.gain.value = 0.022 * lauter;
+    q.connect(f); f.connect(g); g.connect(c.destination); q.start(t);
+  }
+  const takt = Math.floor(n / 16) % BASS.length;
+  const ton = BASS[takt] * (s === 3 || s === 7 ? 2 : 1);   // Bass
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = 'triangle'; o.frequency.setValueAtTime(ton, t);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.07 * lauter, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + ACHTEL * 0.9);
+  o.connect(g).connect(c.destination); o.start(t); o.stop(t + ACHTEL);
+  if (s === 2 || s === 6) {        // Glitzern
+    const o2 = c.createOscillator(), g2 = c.createGain();
+    o2.type = 'sine'; o2.frequency.setValueAtTime(GLITZER[takt] * (s === 6 ? 1.5 : 1), t);
+    g2.gain.setValueAtTime(0.0001, t); g2.gain.exponentialRampToValueAtTime(0.018 * lauter, t + 0.01); g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    o2.connect(g2).connect(c.destination); o2.start(t); o2.stop(t + 0.35);
+  }
+}
+
+/* ---------------- Fenster und Menü ---------------- */
+function zeigeEbene(id) {
+  ['menue', 'gameover', 'sieg', 'pause', 'skins', 'hilfe', 'konto'].forEach(e => $(e).classList.toggle('versteckt', e !== id));
+  $('pause-knopf').classList.toggle('versteckt', id !== null || zustand !== 'spiel');
+  // Beim Spielen darf kein Knopf mehr ausgewählt sein, sonst drückt die Leertaste ihn mit
+  if (id === null && document.activeElement && document.activeElement !== document.body && document.activeElement.blur) document.activeElement.blur();
+}
+function menueZeigen() {
+  const teile2 = [`BESTWERT ${daten.best}`];
+  if (daten.besteWelle) teile2.push(`WELLE ${daten.besteWelle}`);
+  if (daten.siege) teile2.push(`🏆 ${daten.siege} ${daten.siege === 1 ? 'SIEG' : 'SIEGE'}`);
+  $('menue-werte').textContent = teile2.join(' · ');
+  $('konto-knopf').textContent = daten.konto ? '👤 ' + daten.konto.name : '👤 ANMELDEN';
+  $('konto-knopf').classList.toggle('an', !!daten.konto);
+  $('k-ton').textContent = daten.ton ? '🔊 TÖNE AN' : '🔇 TÖNE AUS';
+  $('k-musik').textContent = daten.musik ? '🎵 MUSIK AN' : '🎵 MUSIK AUS';
+  zeigeEbene('menue');
+}
+function allesLeeren() {
+  schweif = []; gegner = []; extras = []; texte = []; flaechen = []; kreuze = [];
+  plan = []; banner = null; hinweis = null; zeitlupe = 0; langSchweif = 0; bot.ziel = null;
+}
+
+/* ---------------- Spielablauf ---------------- */
+function neuesSpiel() {
+  audio();
+  allesLeeren(); teile = [];
+  kom = { x: AW / 2, y: AH / 2, zx: AW / 2, zy: AH / 2, winkel: -Math.PI / 2, tempo: 0, unverwundbar: 0, schild: false };
+  punkte = 0; welle = 0; herzen = HERZEN_START; endlos = false; siegGeschafft = false; besteComboRunde = 0;
+  wackeln = 0; blitz = 0; welt = WELTEN[0]; spielzeit = 0; finger = null;
+  wellePhase = 'pause'; pauseZeit = 1.3;
+  gesehen = new Set();
+  rekordAlt = daten.best;
+  daten.spiele++; sichern();
+  zustand = 'spiel';
+  zeigeEbene(null);
+  musikStart();
+  banner = { text: 'LOS!', zeit: 1.2 };
+  const handy = window.matchMedia('(pointer: coarse)').matches;
+  hinweis = { text: handy ? '👆 Wisch über den Bildschirm und zieh Kreise um die roten Funken!' : '🖱️ Beweg die Maus und zieh Kreise um die roten Funken!', zeit: 6 };
+}
+function pause(an) {
+  if (an && zustand === 'spiel') {
+    zustand = 'pause'; musikStopp(); finger = null; tasten.clear();
+    $('pause-info').textContent = `Welle ${welle} · ${punkte} Punkte`;
+    zeigeEbene('pause');
+  } else if (!an && zustand === 'pause') {
+    zustand = 'spiel'; zeigeEbene(null); musikStart();
+  }
+}
+function zumMenue() {
+  zustand = 'menue'; musikStopp(); allesLeeren(); welle = 0; welt = WELTEN[0];
+  menueZeigen();
+}
+
+// Wellen: Welle 1–4 normal, Welle 5 Boss, 6–9 normal, 10 Mega-Boss usw.
+function welleStarten() {
+  welle++; welleZeit = 0; wellePhase = 'kampf';
+  welt = WELTEN[Math.floor((welle - 1) / 5) % WELTEN.length];
+  plan = [];
+  if (welle % 5 === 0) {
+    const stufe = welle / 5;
+    plan.push({ typ: 'boss', wann: 1.4, stufe }, { typ: 'funke', wann: 2.6 }, { typ: 'funke', wann: 2.9 });
+    banner = { text: '⚠ BOSS ⚠', unter: bossName(stufe), zeit: 2.6 };
+    TON.boss();
+  } else {
+    const typen = [];
+    const dazu = (typ, n) => { for (let i = 0; i < n; i++) typen.push(typ); };
+    dazu('funke', Math.min(10, 3 + Math.floor(welle * 0.9)));
+    if (welle >= 3) dazu('jaeger', Math.min(5, Math.floor((welle - 1) / 2)));
+    if (welle >= 4) dazu('schneider', Math.min(3, 1 + Math.floor((welle - 4) / 4)));
+    if (welle >= 6) dazu('panzer', Math.min(4, 1 + Math.floor((welle - 6) / 3)));
+    if (welle >= 7) dazu('bombe', Math.min(3, 1 + Math.floor((welle - 7) / 4)));
+    for (let i = typen.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [typen[i], typen[j]] = [typen[j], typen[i]]; }
+    typen.forEach((typ, i) => plan.push({ typ, wann: 0.8 + Math.floor(i / 3) * 2.4 + (i % 3) * 0.3 }));
+    if (welle >= 2) plan.push({ typ: 'stern', wann: 3.2 });
+    if (welle >= 3 && welle % 3 === 0) plan.push({ typ: 'stern', wann: 8 });
+    plan.sort((a, b) => a.wann - b.wann);
+    banner = { text: 'WELLE ' + welle, zeit: 1.6 };
+    TON.welle();
+  }
+}
+const bossName = stufe => stufe === 1 ? 'DER WIRBEL' : stufe === 2 ? 'MEGA-WIRBEL' : 'ULTRA-WIRBEL';
+function feindeLebend() { let n = 0; for (const g of gegner) if (!g.tot && g.typ !== 'stern') n++; return n; }
+function feindeUebrig() { return feindeLebend() + plan.filter(p => p.typ !== 'stern').length; }
+function welleAktualisieren(dt) {
+  if (wellePhase === 'kampf') {
+    const feinde = feindeLebend();
+    if (feinde < 9) welleZeit += dt;            // zu viele auf einmal? Dann warten die nächsten kurz
+    while (plan.length && plan[0].wann <= welleZeit) {
+      const p = plan.shift();
+      if (p.typ === 'boss') bossNeu(p.stufe); else gegnerNeu(p.typ);
+    }
+    if (!plan.length && feindeLebend() === 0 && welleZeit > 1) welleGeschafft();
+  } else if (wellePhase === 'pause') {
+    pauseZeit -= dt;
+    if (pauseZeit <= 0) {
+      if (welle === ZIEL_WELLE && !endlos && !siegGeschafft) siegErreicht();
+      else welleStarten();
+    }
+  }
+}
+function welleGeschafft() {
+  wellePhase = 'pause'; pauseZeit = 2.4;
+  const bonus = welle * 5;
+  punkteDazu(bonus);
+  banner = { text: 'WELLE ' + welle + ' GESCHAFFT', unter: '+' + bonus + ' BONUS', zeit: 2.1 };
+  TON.welle();
+  for (const g of gegner) if (!g.tot && g.typ === 'stern') { g.tot = true; explosion(g.x, g.y, TYPEN.stern.farbe, 6, 20); }
+}
+function punkteDazu(n) {
+  if (zustand !== 'spiel' || n <= 0) return;
+  const vorher = punkte;
+  punkte += n;
+  for (const s of SKINS) {
+    if (!s.nurSieg && s.ab > 0 && vorher < s.ab && punkte >= s.ab && rekordAlt < s.ab) { hinweis = { text: `🎨 Neuer Skin: ${s.name}!`, zeit: 3 }; TON.skin(); }
+  }
+}
+function siegErreicht() {
+  siegGeschafft = true; zustand = 'sieg'; musikStopp(); finger = null;
+  blitz = 0.5; blitzFarbe = '255,230,150';
+  TON.sieg();
+  daten.siege++; daten.best = Math.max(daten.best, punkte); daten.besteWelle = Math.max(daten.besteWelle, welle);
+  daten.besteCombo = Math.max(daten.besteCombo || 0, besteComboRunde); sichern();
+  const farben = ['#ffd24a', '#00aaff', '#ff4fd8', '#2fcf78', '#ffffff'];
+  for (let i = 0; i < 140; i++) {
+    teile.push({ x: Math.random() * AW, y: -5 - Math.random() * AH * 0.6, vx: zufall(-12, 12), vy: zufall(15, 35), leben: 1, max: 3 + Math.random() * 1.5, farbe: farben[i % farben.length], g: 4, groesse: 1 + Math.random() * 1.2, form: 'konfetti', bremse: 0 });
+  }
+  const info = $('sieg-info');
+  info.textContent = '';
+  if (daten.konto) info.append(`Stark, ${daten.konto.name}! `);
+  info.append('Du hast den ');
+  const b = document.createElement('b'); b.textContent = 'Mega-Wirbel'; info.append(b);
+  info.append(` besiegt und alle ${ZIEL_WELLE} Wellen geschafft. ${punkte} Punkte – das schafft nicht jeder!`);
+  setTimeout(() => { if (zustand === 'sieg') zeigeEbene('sieg'); }, 900);
+}
+function sterben() {
+  if (zustand !== 'spiel') return;
+  zustand = 'tot'; totZeit = performance.now(); musikStopp(); finger = null;
+  wackeln = 0.5; blitz = 0.35; blitzFarbe = '255,60,90'; TON.tot();
+  const skin = aktuellerSkin();
+  explosion(kom.x, kom.y, skin.farbe, 30, 70);
+  schweif = [];
+  const neuerRekord = punkte > daten.best;
+  if (neuerRekord) daten.best = punkte;
+  daten.besteWelle = Math.max(daten.besteWelle, welle);
+  daten.besteCombo = Math.max(daten.besteCombo || 0, besteComboRunde);
+  sichern();
+  const freigeschaltet = SKINS.filter(s => !s.nurSieg && s.ab > rekordAlt && s.ab <= daten.best);
+  setTimeout(() => {
+    if (zustand !== 'tot') return;
+    $('go-titel').textContent = endlos ? 'WAHNSINN!' : welle >= 8 ? 'SO KNAPP!' : welle >= 4 ? 'STARK!' : 'AUTSCH!';
+    $('go-punkte').textContent = punkte;
+    $('go-rekord').classList.toggle('versteckt', !neuerRekord || punkte === 0);
+    const combo = besteComboRunde >= 2 ? ` · größte Combo ×${besteComboRunde}` : '';
+    $('go-info').textContent = endlos ? `Endlos-Modus · Welle ${welle}${combo}` : `Welle ${welle} von ${ZIEL_WELLE}${combo} · Bestwert ${daten.best}`;
+    $('go-balken-rahmen').classList.toggle('versteckt', endlos);
+    $('go-balken').style.width = Math.min(100, Math.max(0, welle - 1) / ZIEL_WELLE * 100) + '%';
+    $('go-skin').textContent = freigeschaltet.length ? `🎨 Neu freigeschaltet: ${freigeschaltet.map(s => s.name).join(', ')} – schau bei den Skins!` : '';
+    zeigeEbene('gameover');
+  }, 900);
+}
+
+/* ---------------- Gegner ---------------- */
+function freierPlatz(r) {
+  let best = null, bestD = -1;
+  for (let i = 0; i < 30; i++) {
+    const x = zufall(5 + r, AW - 5 - r), y = zufall(5 + r, AH - 5 - r);
+    const d = Math.hypot(x - kom.x, y - kom.y);
+    if (d > 32) return { x, y };
+    if (d > bestD) { bestD = d; best = { x, y }; }
+  }
+  return best;
+}
+function gegnerNeu(typ, x, y, spawnZeit = 0.9) {
+  const T = TYPEN[typ];
+  if (x == null) { const p = freierPlatz(T.r); x = p.x; y = p.y; }
+  const w = Math.random() * ZWEI_PI;
+  const g = { typ, x, y, vx: 0, vy: 0, r: T.r, spawn: spawnZeit, spawnMax: spawnZeit, alter: 0, phase: Math.random() * 6.28, dreh: Math.random() * 6, tot: false, blitz: 0 };
+  if (typ === 'schneider' || typ === 'bombe' || typ === 'stern') { g.richtung = w; g.vx = Math.cos(w) * T.tempo; g.vy = Math.sin(w) * T.tempo; }
+  if (typ === 'panzer') g.schild = true;
+  if (typ === 'stern') g.leben = 10;
+  gegner.push(g);
+  if (zustand === 'spiel' && !gesehen.has(typ)) { gesehen.add(typ); if (HINWEISE[typ]) hinweis = { text: HINWEISE[typ], zeit: 4 }; }
+  return g;
+}
+function bossNeu(stufe) {
+  const x = kom.x < AW / 2 ? AW * 0.72 : AW * 0.28;
+  const g = gegnerNeu('boss', x, klemm(AH * 0.38, 16, AH - 16), 1.4);
+  g.r = stufe === 1 ? 8 : stufe === 2 ? 9 : 9.5;
+  g.hp = g.hpMax = stufe === 1 ? 3 : stufe === 2 ? 5 : 5 + stufe;
+  g.stufe = stufe; g.helferZeit = 2.2; g.name = bossName(stufe);
+  return g;
+}
+function gegnerTempoFaktor() { return Math.min(1.7, 1 + 0.05 * (welle - 1)); }
+function gegnerBewegen(dt) {
+  const f = zustand === 'menue' ? 1 : gegnerTempoFaktor();
+  for (const g of gegner) {
+    if (g.tot) continue;
+    g.alter += dt; g.dreh += dt;
+    if (g.blitz > 0) g.blitz -= dt;
+    if (g.spawn > 0) { g.spawn -= dt; continue; }
+    const T = TYPEN[g.typ];
+    const v = T.tempo * f;
+    if (zustand === 'menue' && g.richtung == null) g.richtung = Math.random() * ZWEI_PI;
+    if (zustand === 'menue' || g.typ === 'bombe' || g.typ === 'stern') {
+      // umherwandern
+      g.richtung += zufall(-1, 1) * 2.4 * dt;
+      const vw = zustand === 'menue' ? 4 : v;
+      g.vx += (Math.cos(g.richtung) * vw - g.vx) * Math.min(1, 2 * dt);
+      g.vy += (Math.sin(g.richtung) * vw - g.vy) * Math.min(1, 2 * dt);
+    } else if (g.typ === 'schneider') {
+      // geradeaus, an den Wänden abprallen
+      const s = Math.hypot(g.vx, g.vy) || 1;
+      g.vx += (g.vx / s * v - g.vx) * Math.min(1, 3 * dt);
+      g.vy += (g.vy / s * v - g.vy) * Math.min(1, 3 * dt);
+    } else {
+      // dem Kometen hinterher, mit etwas Wackeln
+      const w = Math.atan2(kom.y - g.y, kom.x - g.x) + Math.sin(g.alter * 1.3 + g.phase) * (g.typ === 'jaeger' ? 0.25 : 0.7);
+      const lenk = g.typ === 'jaeger' ? 3 : g.typ === 'boss' ? 1 : 1.6;
+      g.vx += (Math.cos(w) * v - g.vx) * Math.min(1, lenk * dt);
+      g.vy += (Math.sin(w) * v - g.vy) * Math.min(1, lenk * dt);
+    }
+    g.x += g.vx * dt; g.y += g.vy * dt;
+    let prall = false;
+    if (g.x < g.r) { g.x = g.r; g.vx = Math.abs(g.vx); prall = true; }
+    if (g.x > AW - g.r) { g.x = AW - g.r; g.vx = -Math.abs(g.vx); prall = true; }
+    if (g.y < g.r) { g.y = g.r; g.vy = Math.abs(g.vy); prall = true; }
+    if (g.y > AH - g.r) { g.y = AH - g.r; g.vy = -Math.abs(g.vy); prall = true; }
+    if (prall && g.richtung != null) g.richtung = Math.atan2(g.vy, g.vx);
+    if (g.typ === 'stern' && zustand === 'spiel') { g.leben -= dt; if (g.leben <= 0) { g.tot = true; explosion(g.x, g.y, T.farbe, 6, 15); } }
+    if (g.typ === 'boss' && zustand === 'spiel') {
+      g.helferZeit -= dt;
+      if (g.helferZeit <= 0) {
+        g.helferZeit = g.stufe >= 2 ? 2.4 : 3.2;
+        if (feindeLebend() < 5 + g.stufe * 2) {
+          const w = Math.random() * ZWEI_PI;
+          gegnerNeu(g.stufe >= 2 && Math.random() < 0.4 ? 'jaeger' : 'funke', klemm(g.x + Math.cos(w) * (g.r + 5), 4, AW - 4), klemm(g.y + Math.sin(w) * (g.r + 5), 4, AH - 4), 0.6);
+        }
+      }
+    }
+  }
+  // nicht übereinander: auseinanderschieben
+  for (let i = 0; i < gegner.length; i++) {
+    const a = gegner[i]; if (a.tot || a.spawn > 0) continue;
+    for (let j = i + 1; j < gegner.length; j++) {
+      const b = gegner[j]; if (b.tot || b.spawn > 0) continue;
+      const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy), min = (a.r + b.r) * 0.9;
+      if (d > 0.001 && d < min) {
+        const p = (min - d) / d;
+        const anteilA = a.typ === 'boss' ? 0 : b.typ === 'boss' ? 1 : 0.5;
+        a.x -= dx * p * anteilA; a.y -= dy * p * anteilA;
+        b.x += dx * p * (1 - anteilA); b.y += dy * p * (1 - anteilA);
+      }
+    }
+  }
+}
+
+/* ---------------- Der Komet und sein Schweif ---------------- */
+function kometBewegen(dt) {
+  const altX = kom.x, altY = kom.y;
+  let kx = 0, ky = 0;
+  if (tasten.has('ArrowLeft') || tasten.has('KeyA')) kx--;
+  if (tasten.has('ArrowRight') || tasten.has('KeyD')) kx++;
+  if (tasten.has('ArrowUp') || tasten.has('KeyW')) ky--;
+  if (tasten.has('ArrowDown') || tasten.has('KeyS')) ky++;
+  if ((kx || ky) && zustand === 'spiel') {
+    const l = Math.hypot(kx, ky);
+    kom.x += kx / l * TASTEN_TEMPO * dt; kom.y += ky / l * TASTEN_TEMPO * dt;
+    kom.zx = kom.x; kom.zy = kom.y;
+  } else {
+    const dx = kom.zx - kom.x, dy = kom.zy - kom.y, d = Math.hypot(dx, dy);
+    if (d > 0.001) { const schritt = Math.min(d, KOMET_TEMPO * dt); kom.x += dx / d * schritt; kom.y += dy / d * schritt; }
+  }
+  kom.x = klemm(kom.x, KOPF, AW - KOPF); kom.y = klemm(kom.y, KOPF, AH - KOPF);
+  kom.zx = klemm(kom.zx, KOPF, AW - KOPF); kom.zy = klemm(kom.zy, KOPF, AH - KOPF);
+  const vx = (kom.x - altX) / dt, vy = (kom.y - altY) / dt;
+  kom.tempo += (Math.hypot(vx, vy) - kom.tempo) * Math.min(1, 10 * dt);
+  if (Math.hypot(vx, vy) > 8) {
+    const ziel = Math.atan2(vy, vx);
+    let diff = ((ziel - kom.winkel + Math.PI) % ZWEI_PI + ZWEI_PI) % ZWEI_PI - Math.PI;
+    kom.winkel += diff * Math.min(1, 12 * dt);
+  }
+  // Funken hinter manchen Skins
+  const skin = aktuellerSkin();
+  if ((skin.id === 'feuer' || skin.id === 'gold') && kom.tempo > 25 && Math.random() < 0.25 && zustand !== 'tot') {
+    teile.push({ x: kom.x + zufall(-1, 1), y: kom.y + zufall(-1, 1), vx: zufall(-6, 6), vy: zufall(-6, 6) + (skin.id === 'feuer' ? -8 : 0), leben: 1, max: 0.4 + Math.random() * 0.3, farbe: Math.random() < 0.5 ? skin.farbe : skin.farbe2, g: 0, groesse: 0.35 + Math.random() * 0.4, form: 'kreis', bremse: 2 });
+  }
+}
+function schweifAktualisieren() {
+  const letzter = schweif[schweif.length - 1];
+  if (!letzter) { schweif.push({ x: kom.x, y: kom.y, t: spielzeit }); return; }
+  if (Math.hypot(kom.x - letzter.x, kom.y - letzter.y) < PUNKT_ABSTAND) return;
+  const neu = { x: kom.x, y: kom.y, t: spielzeit };
+  // Kreuzt das neue Stück (letzter → neu) ein älteres Stück vom Schweif? Dann ist die Schleife zu!
+  const n = schweif.length;
+  for (let i = n - 3; i >= 0; i--) {
+    const a = schweif[i], b = schweif[i + 1];
+    const s = schnitt(letzter.x, letzter.y, neu.x, neu.y, a.x, a.y, b.x, b.y);
+    if (!s) continue;
+    const poly = [{ x: s.x, y: s.y }];
+    for (let k = i + 1; k < n; k++) poly.push(schweif[k]);
+    if (flaeche(poly) < MIN_FLAECHE) break;   // winzige Schleife: einfach weitermalen
+    schleifeZu(poly, s);
+    schweif = [{ x: s.x, y: s.y, t: spielzeit }, neu];
+    return;
+  }
+  schweif.push(neu);
+  // Zu lang? Dann hinten abschneiden
+  const maxL = SCHWEIF_LAENGE * (langSchweif > 0 ? 1.7 : 1);
+  let laenge = 0;
+  for (let i = schweif.length - 1; i > 0; i--) {
+    laenge += Math.hypot(schweif[i].x - schweif[i - 1].x, schweif[i].y - schweif[i - 1].y);
+    if (laenge > maxL) { schweif.splice(0, i); break; }
+  }
+}
+function schweifAltern() {
+  // Der Schweif verblasst, wenn der Komet stillsteht
+  const grenze = spielzeit - SCHWEIF_ALTER * (langSchweif > 0 ? 1.5 : 1);
+  let weg = 0;
+  while (weg < schweif.length - 1 && schweif[weg].t < grenze) weg++;
+  if (weg) schweif.splice(0, weg);
+}
+
+/* ---------------- Schleife geschlossen: alles darin wird eingefangen ---------------- */
+const comboName = n => n >= 7 ? 'VORIX-LOOP!!!' : n >= 5 ? 'MEGA-LOOP!' : n === 4 ? 'SUPER-LOOP!' : n === 3 ? 'TRIPLE!' : n === 2 ? 'DOPPEL!' : '';
+function bossUmkreist(b, poly) {
+  for (let k = 0; k < 8; k++) {
+    const w = k * Math.PI / 4;
+    if (!inSchleife(b.x + Math.cos(w) * b.r * 0.8, b.y + Math.sin(w) * b.r * 0.8, poly)) return false;
+  }
+  return inSchleife(b.x, b.y, poly);
+}
+function schleifeZu(poly, kreuzung) {
+  const imSpiel = zustand === 'spiel';
+  const skin = aktuellerSkin();
+  kreuze.push({ x: kreuzung.x, y: kreuzung.y, zeit: 0.5 });
+  const gefangen = [], bossTreffer = [];
+  for (const g of gegner) {
+    if (g.tot || g.spawn > 0) continue;
+    if (g.typ === 'boss') {
+      if (bossUmkreist(g, poly)) bossTreffer.push(g);
+      else if (imSpiel && inSchleife(g.x, g.y, poly)) popup(g.x, g.y - g.r - 3, 'GRÖSSER!', '#ffffff', 3.4, 0.9);
+    } else if (inSchleife(g.x, g.y, poly)) gefangen.push(g);
+  }
+  if (imSpiel) for (const e of extras) if (!e.weg && inSchleife(e.x, e.y, poly)) extraNehmen(e);
+  const voll = gefangen.length + bossTreffer.length > 0;
+  flaechen.push({ poly: poly.map(p => ({ x: p.x, y: p.y })), zeit: 0.6, max: 0.6, farbe: voll ? skin.farbe : '#ffffff', voll });
+  if (!voll) { if (imSpiel) TON.leer(); return; }
+  if (imSpiel) daten.loops++;
+  // Gefangene erledigen. Bomben reißen alles in der Nähe mit.
+  let anzahl = 0, summe = 0, bummGab = false;
+  const schlange = gefangen.slice();
+  while (schlange.length) {
+    const g = schlange.shift();
+    if (g.tot) continue;
+    if (g.typ === 'panzer' && g.schild) {
+      g.schild = false; g.blitz = 0.3; anzahl++; summe += 1;
+      ringEffekt(g.x, g.y, TYPEN.panzer.farbe, g.r * 1.6);
+      if (imSpiel) TON.panzer();
+      continue;
+    }
+    g.tot = true; anzahl++; summe += TYPEN[g.typ].punkte;
+    explosion(g.x, g.y, TYPEN[g.typ].farbe, g.typ === 'stern' ? 12 : 16, 40);
+    if (g.typ === 'bombe') {
+      bummGab = true;
+      bummEffekt(g.x, g.y);
+      for (const n of gegner) {
+        if (n.tot || n.spawn > 0 || n === g) continue;
+        if (Math.hypot(n.x - g.x, n.y - g.y) > BOMBEN_RADIUS + n.r) continue;
+        if (n.typ === 'boss') { if (!bossTreffer.includes(n)) bossTreffer.push(n); }
+        else { n.schild = false; schlange.push(n); }
+      }
+    }
+  }
+  if (bummGab && imSpiel) { TON.bumm(); wackeln = Math.max(wackeln, 0.3); }
+  if (!imSpiel) return;
+  const m = mitte(poly);
+  if (anzahl > 0) {
+    const gewinn = summe * anzahl;
+    punkteDazu(gewinn);
+    besteComboRunde = Math.max(besteComboRunde, anzahl);
+    popup(m.x, m.y, '+' + gewinn, '#ffffff', anzahl >= 3 ? 6 : 4.5, 1.1);
+    if (anzahl >= 2) popup(m.x, m.y + 6, `×${anzahl} ${comboName(anzahl)}`, anzahl >= 5 ? '#ffd24a' : skin.farbe, anzahl >= 5 ? 5 : 3.6, 1.4);
+    if (anzahl >= 5) { blitz = 0.25; blitzFarbe = '255,230,150'; }
+    TON.schleife(anzahl);
+    if (gefangen.some(g => g.typ === 'stern')) TON.stern();
+    // Manchmal gibt es ein Extra
+    if (!extras.length && Math.random() < 0.08 + anzahl * 0.04) extraNeu(m.x, m.y);
+  }
+  for (const b of bossTreffer) bossTreffen(b);
+}
+function bossTreffen(b) {
+  if (b.tot) return;
+  b.hp--; b.blitz = 0.35; wackeln = Math.max(wackeln, 0.25);
+  explosion(b.x, b.y, TYPEN.boss.farbe, 20, 50);
+  ringEffekt(b.x, b.y, '#ffffff', b.r * 1.5);
+  // vom Kometen weg stoßen
+  const dx = b.x - kom.x, dy = b.y - kom.y, d = Math.hypot(dx, dy) || 1;
+  b.vx = dx / d * 30; b.vy = dy / d * 30;
+  const p = 10 * b.stufe;
+  punkteDazu(p);
+  popup(b.x, b.y - b.r - 3, `TREFFER! +${p}`, '#ffd24a', 4, 1.1);
+  TON.bossTreffer();
+  if (b.hp <= 0) bossBesiegt(b);
+}
+function bossBesiegt(b) {
+  b.tot = true;
+  blitz = 0.45; blitzFarbe = '255,255,255'; wackeln = 0.6;
+  explosion(b.x, b.y, TYPEN.boss.farbe, 60, 90);
+  explosion(b.x, b.y, '#ffd24a', 30, 60);
+  ringEffekt(b.x, b.y, '#ffffff', b.r * 3);
+  TON.bossTot();
+  const bonus = 50 * b.stufe;
+  punkteDazu(bonus);
+  popup(b.x, b.y, `+${bonus}`, '#ffd24a', 7, 1.6);
+  // seine Helfer verschwinden mit
+  for (const g of gegner) {
+    if (g.tot || g === b || g.typ === 'stern') continue;
+    g.tot = true; explosion(g.x, g.y, TYPEN[g.typ].farbe, 10, 40);
+    punkteDazu(TYPEN[g.typ].punkte);
+  }
+  plan = plan.filter(p => p.typ === 'stern');
+  banner = { text: b.name + ' BESIEGT!', zeit: 2.2 };
+  if (herzen < HERZEN_MAX) extraNeu(b.x, b.y, 'herz');
+}
+
+/* ---------------- Treffer, Extras ---------------- */
+function kopfPruefen() {
+  for (const g of gegner) {
+    if (g.tot || g.spawn > 0) continue;
+    if (Math.hypot(g.x - kom.x, g.y - kom.y) > KOPF + g.r * 0.85) continue;
+    if (g.typ === 'stern') {   // Sterne darf man auch einfach einsammeln
+      g.tot = true; explosion(g.x, g.y, TYPEN.stern.farbe, 10, 30);
+      punkteDazu(TYPEN.stern.punkte); popup(g.x, g.y, '+' + TYPEN.stern.punkte, '#ffd24a', 4, 1); TON.stern();
+      continue;
+    }
+    if (kom.unverwundbar > 0) continue;
+    if (g.typ === 'bombe') {   // Bombe direkt berührt: sie explodiert, aber ohne Punkte
+      g.tot = true; bummEffekt(g.x, g.y); TON.bumm();
+      for (const n of gegner) if (!n.tot && n.typ !== 'boss' && n.spawn <= 0 && Math.hypot(n.x - g.x, n.y - g.y) < BOMBEN_RADIUS + n.r) { n.tot = true; explosion(n.x, n.y, TYPEN[n.typ].farbe, 8, 30); }
+    }
+    getroffen();
+    if (zustand !== 'spiel') return;
+  }
+}
+function getroffen() {
+  wegstossen();
+  if (kom.schild) {
+    kom.schild = false; kom.unverwundbar = 1;
+    ringEffekt(kom.x, kom.y, EXTRAS.schild.farbe, 8); TON.schild();
+    return;
+  }
+  herzen--;
+  kom.unverwundbar = 1.8; wackeln = 0.35; blitz = 0.3; blitzFarbe = '255,60,90';
+  explosion(kom.x, kom.y, '#ff4f6d', 14, 40);
+  schweif = [];
+  if (herzen <= 0) sterben(); else TON.autsch();
+}
+function wegstossen() {
+  for (const g of gegner) {
+    if (g.tot || g.typ === 'boss') continue;
+    const dx = g.x - kom.x, dy = g.y - kom.y, d = Math.hypot(dx, dy) || 1;
+    if (d < 18) { g.vx = dx / d * 60; g.vy = dy / d * 60; }
+  }
+}
+function schneiderPruefen() {
+  for (const g of gegner) {
+    if (g.typ !== 'schneider' || g.tot || g.spawn > 0) continue;
+    for (let i = schweif.length - 1; i >= 0; i--) {
+      const p = schweif[i];
+      if (Math.hypot(p.x - g.x, p.y - g.y) < g.r + 0.6) {
+        for (let k = 0; k < 8; k++) teile.push({ x: p.x, y: p.y, vx: zufall(-30, 30), vy: zufall(-30, 30), leben: 1, max: 0.3, farbe: '#ffffff', g: 0, groesse: 0.35, form: 'kreis', bremse: 3 });
+        schweif.splice(0, i + 1);
+        TON.schnitt();
+        break;
+      }
+    }
+  }
+}
+function extraNeu(x, y, typ) {
+  if (!typ) {
+    const moeglich = ['zeit', 'schild', 'schweif'];
+    if (herzen < HERZEN_MAX) moeglich.push('herz');
+    typ = moeglich[Math.floor(Math.random() * moeglich.length)];
+  }
+  extras.push({ typ, x: klemm(x, 5, AW - 5), y: klemm(y, 5, AH - 5), zeit: 9, alter: 0, weg: false });
+}
+function extraNehmen(e) {
+  e.weg = true;
+  const E = EXTRAS[e.typ];
+  if (e.typ === 'zeit') zeitlupe = 5;
+  if (e.typ === 'schild') kom.schild = true;
+  if (e.typ === 'schweif') langSchweif = 10;
+  if (e.typ === 'herz') herzen = Math.min(HERZEN_MAX, herzen + 1);
+  ringEffekt(e.x, e.y, E.farbe, 6);
+  popup(e.x, e.y - 4, E.text, E.farbe, 3.6, 1.3);
+  TON.extra();
+}
+function extrasAktualisieren(dt) {
+  for (const e of extras) {
+    e.zeit -= dt; e.alter += dt;
+    if (!e.weg && Math.hypot(e.x - kom.x, e.y - kom.y) < KOPF + 3.2) extraNehmen(e);
+    if (e.zeit <= 0) e.weg = true;
+  }
+  extras = extras.filter(e => !e.weg);
+}
+
+/* ---------------- Effekte ---------------- */
+function explosion(x, y, farbe, n = 14, kraft = 40) {
+  for (let i = 0; i < n; i++) {
+    const w = Math.random() * ZWEI_PI, v = kraft * (0.3 + Math.random());
+    teile.push({ x, y, vx: Math.cos(w) * v, vy: Math.sin(w) * v, leben: 1, max: 0.45 + Math.random() * 0.5, farbe: i % 4 ? farbe : '#ffffff', g: 0, groesse: 0.45 + Math.random() * 0.8, form: 'kreis', bremse: 2.5 });
+  }
+}
+function ringEffekt(x, y, farbe, r) { teile.push({ x, y, vx: 0, vy: 0, leben: 1, max: 0.45, farbe, g: 0, groesse: r, form: 'ring', bremse: 0 }); }
+function bummEffekt(x, y) {
+  ringEffekt(x, y, TYPEN.bombe.farbe, BOMBEN_RADIUS * 0.75);
+  ringEffekt(x, y, '#ffffff', BOMBEN_RADIUS * 0.5);
+  explosion(x, y, TYPEN.bombe.farbe, 30, 70);
+  explosion(x, y, '#ffd24a', 14, 50);
+}
+function popup(x, y, text, farbe = '#fff', groesse = 4, zeit = 1.1) { texte.push({ x, y, text, farbe, groesse, zeit, max: zeit }); }
+function effekteAktualisieren(dt) {
+  for (const t of teile) {
+    t.leben -= dt / t.max;
+    if (t.bremse) { const b = Math.max(0, 1 - t.bremse * dt); t.vx *= b; t.vy *= b; }
+    t.vy += (t.g || 0) * dt; t.x += t.vx * dt; t.y += t.vy * dt;
+  }
+  teile = teile.filter(t => t.leben > 0);
+  if (teile.length > 700) teile.splice(0, teile.length - 700);
+  for (const t of texte) t.zeit -= dt;
+  texte = texte.filter(t => t.zeit > 0);
+  for (const f of flaechen) f.zeit -= dt;
+  flaechen = flaechen.filter(f => f.zeit > 0);
+  for (const k of kreuze) k.zeit -= dt;
+  kreuze = kreuze.filter(k => k.zeit > 0);
+  if (wackeln > 0) wackeln = Math.max(0, wackeln - dt);
+  if (blitz > 0) blitz = Math.max(0, blitz - dt);
+  if (banner) { banner.zeit -= dt; if (banner.zeit <= 0) banner = null; }
+  if (hinweis) { hinweis.zeit -= dt; if (hinweis.zeit <= 0) hinweis = null; }
+}
+
+/* ---------------- Autopilot: fliegt im Menü als Vorführung (und beim Testen) ---------------- */
+function autopilot(dt) {
+  let g = bot.ziel;
+  if (!g || g.tot || g.spawn > 0 || !gegner.includes(g)) {
+    g = null; let bestD = 1e9;
+    for (const n of gegner) {
+      if (n.tot || n.spawn > 0) continue;
+      const d = Math.hypot(n.x - kom.x, n.y - kom.y) + (n.typ === 'boss' ? 25 : 0);
+      if (d < bestD) { bestD = d; g = n; }
+    }
+    bot.ziel = g; bot.dreh = 0;
+    if (g) bot.w = Math.atan2(kom.y - g.y, kom.x - g.x);
+  }
+  if (!g) { bot.w += dt * 1.2; kom.zx = AW / 2 + Math.cos(bot.w) * AW * 0.3; kom.zy = AH / 2 + Math.sin(bot.w) * AH * 0.25; return; }
+  const R = g.r + (g.typ === 'boss' ? 8 : 6.5);
+  const d = Math.hypot(kom.x - g.x, kom.y - g.y);
+  if (d > R * 1.5) {
+    bot.w = Math.atan2(kom.y - g.y, kom.x - g.x); bot.dreh = 0;
+  } else {
+    const omega = zustand === 'menue' ? 4.5 : 8;
+    bot.w += omega * dt; bot.dreh += omega * dt;
+    if (bot.dreh > Math.PI * 3.2) bot.ziel = null;   // klappt nicht: ein anderes Ziel nehmen
+  }
+  kom.zx = g.x + Math.cos(bot.w) * R; kom.zy = g.y + Math.sin(bot.w) * R;
+}
+
+/* ---------------- Ein Schritt ---------------- */
+function aktualisieren(dt) {
+  uhr += dt;
+  effekteAktualisieren(dt);
+  if (zustand === 'menue') {      // Vorführung: der Komet fängt von selbst Funken ein
+    spielzeit += dt;
+    if (feindeLebend() + gegner.filter(g => g.typ === 'stern').length < 3) {
+      demoTimer -= dt;
+      if (demoTimer <= 0) { demoTimer = 0.8; gegnerNeu(Math.random() < 0.2 ? 'stern' : 'funke'); }
+    }
+    autopilot(dt);
+    kometBewegen(dt);
+    schweifAktualisieren(); schweifAltern();
+    gegnerBewegen(dt);
+    gegner = gegner.filter(g => !g.tot);
+    return;
+  }
+  if (zustand !== 'spiel') return;
+  spielzeit += dt;
+  if (kom.unverwundbar > 0) kom.unverwundbar -= dt;
+  if (zeitlupe > 0) zeitlupe -= dt;
+  if (langSchweif > 0) langSchweif -= dt;
+  if (autoSpiel) autopilot(dt);
+  kometBewegen(dt);
+  schweifAktualisieren(); schweifAltern();
+  welleAktualisieren(dt);
+  if (zustand !== 'spiel') return;
+  gegnerBewegen(zeitlupe > 0 ? dt * 0.4 : dt);
+  schneiderPruefen();
+  kopfPruefen();
+  extrasAktualisieren(dt);
+  gegner = gegner.filter(g => !g.tot);
+}
+
+/* ---------------- Zeichnen ---------------- */
+function kopf(c, skin, x, y, r, winkel) {
+  c.save(); c.translate(x, y);
+  const blick = (farbe = '#fff', pupille = '#06101e') => {   // Augen schauen in Flugrichtung
+    const bx = Math.cos(winkel) * r * 0.18, by = Math.sin(winkel) * r * 0.18;
+    for (const s of [-1, 1]) {
+      c.fillStyle = farbe; c.beginPath(); c.ellipse(s * r * 0.36 + bx, -r * 0.08 + by, r * 0.24, r * 0.3, 0, 0, ZWEI_PI); c.fill();
+      c.fillStyle = pupille; c.beginPath(); c.arc(s * r * 0.36 + bx * 1.6, -r * 0.05 + by * 1.6, r * 0.12, 0, ZWEI_PI); c.fill();
+    }
+  };
+  if (skin.id === 'pfannkuchen') {
+    const g = c.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r);
+    g.addColorStop(0, '#ffe08a'); g.addColorStop(0.75, '#f2a93b'); g.addColorStop(1, '#b8732a');
+    c.shadowColor = '#ffb347'; c.shadowBlur = r * 0.9;
+    c.beginPath(); c.arc(0, 0, r, 0, ZWEI_PI); c.fillStyle = g; c.fill(); c.shadowBlur = 0;
+    c.fillStyle = 'rgba(255,240,200,.55)'; c.beginPath(); c.ellipse(r * 0.2, -r * 0.45, r * 0.32, r * 0.14, -0.3, 0, ZWEI_PI); c.fill();   // Butter
+    blick('#2a1a0a', '#2a1a0a');
+    c.strokeStyle = '#2a1a0a'; c.lineWidth = r * 0.12; c.lineCap = 'round';
+    c.beginPath(); c.arc(0, r * 0.18, r * 0.32, 0.15 * Math.PI, 0.85 * Math.PI); c.stroke();
+  } else if (skin.id === 'vorix') {
+    c.rotate(winkel + Math.PI / 4);
+    const h = r * 0.95;
+    c.beginPath(); c.moveTo(-h + r * 0.3, -h); c.arcTo(h, -h, h, h, r * 0.3); c.arcTo(h, h, -h, h, r * 0.3); c.arcTo(-h, h, -h, -h, r * 0.3); c.arcTo(-h, -h, h, -h, r * 0.3); c.closePath();
+    c.fillStyle = '#071425'; c.fill();
+    c.shadowColor = '#00d4ff'; c.shadowBlur = r; c.strokeStyle = '#00d4ff'; c.lineWidth = r * 0.16; c.stroke();
+    c.lineWidth = r * 0.26; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(-r * 0.45, -r * 0.45); c.lineTo(r * 0.45, r * 0.45); c.moveTo(r * 0.45, -r * 0.45); c.lineTo(-r * 0.45, r * 0.45); c.stroke();
+    c.shadowBlur = 0;
+  } else if (skin.id === 'gold') {
+    const g = c.createLinearGradient(-r, -r, r, r);
+    g.addColorStop(0, '#fff1b8'); g.addColorStop(0.45, '#ffd24a'); g.addColorStop(1, '#a87a10');
+    c.shadowColor = '#ffd24a'; c.shadowBlur = r * 1.2;
+    c.beginPath(); c.arc(0, 0, r, 0, ZWEI_PI); c.fillStyle = g; c.fill(); c.shadowBlur = 0;
+    blick('#3a2600', '#ffd24a');
+    c.fillStyle = '#ffd24a';      // kleine Krone
+    const k = r * 0.7, o = -r * 0.9;
+    c.beginPath(); c.moveTo(-k, o); c.lineTo(-k, o - r * 0.5); c.lineTo(-k * 0.5, o - r * 0.22); c.lineTo(0, o - r * 0.62); c.lineTo(k * 0.5, o - r * 0.22); c.lineTo(k, o - r * 0.5); c.lineTo(k, o); c.closePath(); c.fill();
+  } else if (skin.id === 'feuer') {
+    const g = c.createRadialGradient(0, -r * 0.2, r * 0.1, 0, 0, r);
+    g.addColorStop(0, '#ffe066'); g.addColorStop(0.55, '#ff7a1f'); g.addColorStop(1, '#ff2a00');
+    c.shadowColor = '#ff5a1f'; c.shadowBlur = r * 1.3;
+    c.beginPath(); c.arc(0, 0, r, 0, ZWEI_PI); c.fillStyle = g; c.fill(); c.shadowBlur = 0;
+    blick('#fff', '#2a0a00');
+  } else {
+    c.shadowColor = skin.farbe; c.shadowBlur = r * 1.2;
+    c.beginPath(); c.arc(0, 0, r, 0, ZWEI_PI); c.fillStyle = '#081a30'; c.fill();
+    c.strokeStyle = skin.farbe; c.lineWidth = r * 0.22; c.stroke(); c.shadowBlur = 0;
+    blick();
+  }
+  c.restore();
+}
+function schweifMalen(c, pts, skin, u) {
+  const m = pts.length; if (m < 2) return;
+  c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+  const STUECK = 4;
+  for (let i = 0; i < m - 1; i += STUECK) {
+    const ende = Math.min(m - 1, i + STUECK);
+    const t = ende / (m - 1);                       // 0 = Ende vom Schweif, 1 = beim Kopf
+    c.beginPath(); c.moveTo(pts[i].x * u, pts[i].y * u);
+    for (let k = i + 1; k <= ende; k++) c.lineTo(pts[k].x * u, pts[k].y * u);
+    c.strokeStyle = mischFarbe(skin, t);
+    c.globalAlpha = 0.16 * t; c.lineWidth = (1.4 + 2.4 * t) * u; c.stroke();        // Leuchten
+    c.globalAlpha = 0.3 + 0.7 * t; c.lineWidth = (0.35 + 0.65 * t) * u; c.stroke();  // heller Kern
+  }
+  c.restore();
+}
+function gegnerMalen(c, g, x, y, r) {
+  const T = TYPEN[g.typ], farbe = T.farbe;
+  c.save(); c.translate(x, y);
+  const augen = (dx = 0, dy = -0.05, gr = 0.22) => {
+    const w = Math.atan2(kom.y - g.y, kom.x - g.x), bx = Math.cos(w) * r * 0.08, by = Math.sin(w) * r * 0.08;
+    for (const s of [-1, 1]) {
+      c.fillStyle = '#fff'; c.beginPath(); c.arc((s * 0.3 + dx) * r, dy * r, gr * r, 0, ZWEI_PI); c.fill();
+      c.fillStyle = '#1a0008'; c.beginPath(); c.arc((s * 0.3 + dx) * r + bx, dy * r + by, gr * r * 0.5, 0, ZWEI_PI); c.fill();
+    }
+    c.strokeStyle = '#1a0008'; c.lineWidth = r * 0.1; c.lineCap = 'round';   // böse Augenbrauen
+    c.beginPath(); c.moveTo(-r * 0.52, (dy - 0.32) * r); c.lineTo(-r * 0.12, (dy - 0.2) * r); c.moveTo(r * 0.52, (dy - 0.32) * r); c.lineTo(r * 0.12, (dy - 0.2) * r); c.stroke();
+  };
+  if (g.typ === 'funke') {
+    c.shadowColor = farbe; c.shadowBlur = r * 1.1;
+    c.beginPath();
+    for (let k = 0; k < 16; k++) { const w = k * Math.PI / 8 + g.dreh * 1.6, rr = k % 2 ? r * 0.74 : r * 1.08; c.lineTo(Math.cos(w) * rr, Math.sin(w) * rr); }
+    c.closePath(); c.fillStyle = '#3a0814'; c.fill(); c.strokeStyle = farbe; c.lineWidth = r * 0.16; c.stroke(); c.shadowBlur = 0;
+    augen();
+  } else if (g.typ === 'jaeger') {
+    c.rotate(Math.atan2(g.vy, g.vx));
+    c.shadowColor = farbe; c.shadowBlur = r * 1.1;
+    c.beginPath(); c.moveTo(r * 1.35, 0); c.lineTo(-r * 0.9, r * 0.95); c.lineTo(-r * 0.45, 0); c.lineTo(-r * 0.9, -r * 0.95); c.closePath();
+    c.fillStyle = '#3a1806'; c.fill(); c.strokeStyle = farbe; c.lineWidth = r * 0.18; c.stroke(); c.shadowBlur = 0;
+    c.fillStyle = '#fff'; c.beginPath(); c.arc(r * 0.35, 0, r * 0.2, 0, ZWEI_PI); c.fill();
+  } else if (g.typ === 'schneider') {
+    c.rotate(g.dreh * 9);
+    c.shadowColor = '#9fe0ff'; c.shadowBlur = r * 1.1;
+    c.beginPath();
+    for (let k = 0; k < 24; k++) { const w = k * Math.PI / 12, rr = k % 2 ? r * 0.76 : r * 1.08; c.lineTo(Math.cos(w) * rr, Math.sin(w) * rr); }
+    c.closePath(); c.fillStyle = '#0b1a2a'; c.fill(); c.strokeStyle = farbe; c.lineWidth = r * 0.12; c.stroke(); c.shadowBlur = 0;
+    c.beginPath(); c.arc(0, 0, r * 0.32, 0, ZWEI_PI); c.fillStyle = farbe; c.fill();
+  } else if (g.typ === 'panzer') {
+    c.shadowColor = farbe; c.shadowBlur = r;
+    c.beginPath(); for (let k = 0; k < 6; k++) { const w = k * Math.PI / 3 + Math.PI / 6; c.lineTo(Math.cos(w) * r, Math.sin(w) * r); } c.closePath();
+    c.fillStyle = '#06261a'; c.fill(); c.strokeStyle = farbe; c.lineWidth = r * 0.16; c.stroke(); c.shadowBlur = 0;
+    augen(0, 0, 0.2);
+    if (g.schild) {   // Schild: dicker Ring aus 6 Teilen
+      c.save(); c.rotate(g.dreh * 1.2); c.strokeStyle = farbe; c.lineWidth = r * 0.2; c.shadowColor = farbe; c.shadowBlur = r * 0.8;
+      for (let k = 0; k < 6; k++) { c.beginPath(); c.arc(0, 0, r * 1.5, k * Math.PI / 3 + 0.12, (k + 1) * Math.PI / 3 - 0.12); c.stroke(); }
+      c.restore();
+    }
+  } else if (g.typ === 'bombe') {
+    c.save(); c.globalAlpha = 0.14 + 0.06 * Math.sin(g.alter * 6); c.strokeStyle = farbe; c.setLineDash([5, 6]); c.lineWidth = 1.5;
+    c.beginPath(); c.arc(0, 0, BOMBEN_RADIUS * U, 0, ZWEI_PI); c.stroke(); c.restore();   // so weit reicht die Explosion
+    const puls = 1 + Math.sin(g.alter * 8) * 0.07;
+    c.shadowColor = farbe; c.shadowBlur = r * 1.4;
+    c.beginPath(); c.arc(0, 0, r * puls, 0, ZWEI_PI); c.fillStyle = '#2a0624'; c.fill(); c.strokeStyle = farbe; c.lineWidth = r * 0.18; c.stroke(); c.shadowBlur = 0;
+    c.strokeStyle = '#ffd24a'; c.lineWidth = r * 0.14;
+    c.beginPath(); c.moveTo(r * 0.45, -r * 0.8); c.quadraticCurveTo(r * 0.9, -r * 1.6, r * 1.3, -r * 1.3); c.stroke();
+    c.fillStyle = Math.sin(g.alter * 30) > 0 ? '#ffffff' : '#ffd24a';
+    c.beginPath(); c.arc(r * 1.3, -r * 1.3, r * 0.26, 0, ZWEI_PI); c.fill();
+    c.fillStyle = farbe; c.font = `900 ${Math.round(r * 1.2)}px Orbitron, sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('!', 0, r * 0.08);
+  } else if (g.typ === 'stern') {
+    if (g.leben < 2.5 && Math.floor(g.leben * 8) % 2) c.globalAlpha = 0.35;
+    c.rotate(g.dreh * 1.4);
+    c.shadowColor = farbe; c.shadowBlur = r * 1.6;
+    c.beginPath(); for (let k = 0; k < 10; k++) { const w = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? r * 0.5 : r * 1.2; c.lineTo(Math.cos(w) * rr, Math.sin(w) * rr); } c.closePath();
+    c.fillStyle = farbe; c.fill(); c.shadowBlur = 0;
+    c.fillStyle = '#fff8d8'; c.beginPath(); c.arc(0, 0, r * 0.22, 0, ZWEI_PI); c.fill();
+  } else if (g.typ === 'boss') {
+    const bf = g.stufe >= 2 ? '#ffd24a' : farbe;
+    c.shadowColor = bf; c.shadowBlur = r * 0.7;
+    c.beginPath(); c.arc(0, 0, r, 0, ZWEI_PI); c.fillStyle = '#1a0610'; c.fill(); c.strokeStyle = bf; c.lineWidth = r * 0.08; c.stroke(); c.shadowBlur = 0;
+    c.save(); c.rotate(g.dreh * 2.2);                 // Wirbel-Arme
+    c.strokeStyle = bf; c.lineWidth = r * 0.11; c.lineCap = 'round'; c.globalAlpha = 0.85;
+    for (let a = 0; a < 3; a++) {
+      c.rotate(ZWEI_PI / 3); c.beginPath();
+      for (let s = 0; s <= 18; s++) { const t = s / 18, w = t * 2.6, rr = r * (0.22 + 0.7 * t); s ? c.lineTo(Math.cos(w) * rr, Math.sin(w) * rr) : c.moveTo(Math.cos(w) * rr, Math.sin(w) * rr); }
+      c.stroke();
+    }
+    c.restore();
+    c.fillStyle = '#1a0610'; c.beginPath(); c.ellipse(0, -r * 0.08, r * 0.62, r * 0.36, 0, 0, ZWEI_PI); c.fill();
+    augen(0, -0.08, 0.17);
+    if (g.blitz > 0) { c.globalAlpha = g.blitz / 0.35 * 0.7; c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, r, 0, ZWEI_PI); c.fill(); c.globalAlpha = 1; }
+    // Lebenspunkte über dem Boss
+    const n = g.hpMax, ab = r * 0.42;
+    for (let i = 0; i < n; i++) {
+      const px = (i - (n - 1) / 2) * ab;
+      c.beginPath(); c.arc(px, -r - r * 0.35, r * 0.13, 0, ZWEI_PI);
+      c.fillStyle = i < g.hp ? bf : 'rgba(255,255,255,.18)'; c.fill();
+    }
+  }
+  if (g.blitz > 0 && g.typ !== 'boss') { c.globalAlpha = 0.7; c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, r, 0, ZWEI_PI); c.fill(); }
+  c.restore();
+}
+function hintergrund() {
+  const gr = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.hypot(W, H) / 2);
+  gr.addColorStop(0, welt.bg[1]); gr.addColorStop(1, welt.bg[0]);
+  ctx.fillStyle = gr; ctx.fillRect(-30, -30, W + 60, H + 60);
+  // Gitter
+  ctx.strokeStyle = welt.haupt; ctx.globalAlpha = 0.07; ctx.lineWidth = 1;
+  const a = 10 * U; ctx.beginPath();
+  for (let x = (W / 2) % a; x < W; x += a) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+  for (let y = (H / 2) % a; y < H; y += a) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+  ctx.stroke();
+  // großes X in der Mitte – das Vorix-Zeichen
+  ctx.globalAlpha = 0.05; ctx.lineWidth = 7 * U; ctx.lineCap = 'round';
+  const s = 22 * U; ctx.beginPath();
+  ctx.moveTo(W / 2 - s, H / 2 - s); ctx.lineTo(W / 2 + s, H / 2 + s); ctx.moveTo(W / 2 + s, H / 2 - s); ctx.lineTo(W / 2 - s, H / 2 + s); ctx.stroke();
+  // Sterne
+  ctx.fillStyle = '#fff';
+  for (const st of sterne) { ctx.globalAlpha = 0.2 + 0.5 * (0.5 + 0.5 * Math.sin(uhr * st.v + st.p)); ctx.fillRect(st.x * W, st.y * H, st.r, st.r); }
+  // Rand vom Spielfeld
+  ctx.globalAlpha = 0.4; ctx.strokeStyle = welt.haupt; ctx.lineWidth = 2; ctx.strokeRect(1, 1, W - 2, H - 2);
+  ctx.globalAlpha = 1;
+}
+function zeichnen() {
+  ctx.save();
+  if (wackeln > 0) ctx.translate((Math.random() - 0.5) * U * wackeln * 4, (Math.random() - 0.5) * U * wackeln * 4);
+  hintergrund();
+  // eingefangene Flächen leuchten kurz auf
+  for (const f of flaechen) {
+    const t = f.zeit / f.max;
+    ctx.beginPath(); f.poly.forEach((p, i) => i ? ctx.lineTo(p.x * U, p.y * U) : ctx.moveTo(p.x * U, p.y * U)); ctx.closePath();
+    ctx.globalAlpha = (f.voll ? 0.38 : 0.1) * t; ctx.fillStyle = f.farbe; ctx.fill();
+    ctx.globalAlpha = t * (f.voll ? 1 : 0.5); ctx.strokeStyle = f.farbe; ctx.lineWidth = 2.5; ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  // Extras
+  for (const e of extras) {
+    if (e.zeit < 2.5 && Math.floor(e.zeit * 8) % 2) continue;   // blinkt kurz vor dem Verschwinden
+    const E = EXTRAS[e.typ], x = e.x * U, y = e.y * U, r = 3.2 * U * (1 + Math.sin(e.alter * 5) * 0.07);
+    ctx.save(); ctx.shadowColor = E.farbe; ctx.shadowBlur = 16; ctx.strokeStyle = E.farbe; ctx.lineWidth = 2.5; ctx.fillStyle = 'rgba(8,20,36,.88)';
+    ctx.beginPath(); ctx.arc(x, y, r, 0, ZWEI_PI); ctx.fill(); ctx.stroke(); ctx.shadowBlur = 0;
+    ctx.font = `${Math.round(r * 1.05)}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+    ctx.fillText(E.zeichen, x, y + r * 0.05);
+    ctx.restore();
+  }
+  // Gegner
+  for (const g of gegner) {
+    const x = g.x * U, y = g.y * U, r = g.r * U;
+    if (g.spawn > 0) {     // Ankündigung: ein Ring zieht sich zusammen, so lange ist der Gegner harmlos
+      const t = 1 - g.spawn / g.spawnMax;
+      ctx.save(); ctx.globalAlpha = 0.3 + 0.5 * t; ctx.strokeStyle = TYPEN[g.typ].farbe; ctx.lineWidth = 2; ctx.setLineDash([4, 5]);
+      ctx.beginPath(); ctx.arc(x, y, r * (3.2 - 2.2 * t), 0, ZWEI_PI); ctx.stroke(); ctx.restore();
+      ctx.save(); ctx.globalAlpha = t * 0.55; gegnerMalen(ctx, g, x, y, r * (0.4 + 0.6 * t)); ctx.restore();
+      continue;
+    }
+    gegnerMalen(ctx, g, x, y, r);
+  }
+  // Schweif und Komet
+  const skin = aktuellerSkin();
+  if (zustand !== 'tot') {
+    schweifMalen(ctx, schweif.concat([{ x: kom.x, y: kom.y }]), skin, U);
+    const blinkt = kom.unverwundbar > 0 && Math.floor(kom.unverwundbar * 12) % 2 === 0;
+    if (!blinkt) kopf(ctx, skin, kom.x * U, kom.y * U, KOPF * U, kom.winkel);
+    if (kom.schild) {
+      ctx.save(); ctx.strokeStyle = EXTRAS.schild.farbe; ctx.lineWidth = 2.5; ctx.shadowColor = EXTRAS.schild.farbe; ctx.shadowBlur = 12; ctx.globalAlpha = 0.75 + 0.25 * Math.sin(uhr * 6);
+      ctx.beginPath(); ctx.arc(kom.x * U, kom.y * U, KOPF * U * 1.9, 0, ZWEI_PI); ctx.stroke(); ctx.restore();
+    }
+  }
+  // Kreuzungspunkt: ein kurzes X – das Zeichen von VORIX
+  for (const k of kreuze) {
+    const t = k.zeit / 0.5, s = (1.6 + (1 - t) * 2.6) * U;
+    ctx.save(); ctx.globalAlpha = t; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.shadowColor = skin.farbe; ctx.shadowBlur = 14;
+    ctx.beginPath(); ctx.moveTo(k.x * U - s, k.y * U - s); ctx.lineTo(k.x * U + s, k.y * U + s); ctx.moveTo(k.x * U + s, k.y * U - s); ctx.lineTo(k.x * U - s, k.y * U + s); ctx.stroke();
+    ctx.restore();
+  }
+  // Partikel
+  for (const t of teile) {
+    ctx.globalAlpha = Math.max(0, Math.min(1, t.leben));
+    ctx.fillStyle = t.farbe; ctx.strokeStyle = t.farbe;
+    const x = t.x * U, y = t.y * U, gr = t.groesse * U;
+    if (t.form === 'ring') { ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, gr * (1.6 - t.leben), 0, ZWEI_PI); ctx.stroke(); }
+    else if (t.form === 'konfetti') { ctx.save(); ctx.translate(x, y); ctx.rotate(t.y * 0.3); ctx.fillRect(-gr / 2, -gr / 4, gr, gr / 2); ctx.restore(); }
+    else { ctx.beginPath(); ctx.arc(x, y, gr, 0, ZWEI_PI); ctx.fill(); }
+  }
+  ctx.globalAlpha = 1;
+  // Punkte und Combos
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (const t of texte) {
+    const a = t.zeit / t.max, hoch = (1 - a) * 6 * U;
+    ctx.globalAlpha = Math.min(1, a * 2.5);
+    ctx.font = `900 ${Math.round(klemm(t.groesse * U, 13, 50))}px Orbitron, sans-serif`;
+    ctx.fillStyle = t.farbe; ctx.shadowColor = t.farbe; ctx.shadowBlur = 12;
+    ctx.fillText(t.text, klemm(t.x * U, 90, W - 90), t.y * U - hoch);
+  }
+  ctx.shadowBlur = 0; ctx.globalAlpha = 1; ctx.textBaseline = 'alphabetic';
+  ctx.restore();
+  // Zeitlupe: leicht bläulicher Rand
+  if (zeitlupe > 0 && zustand === 'spiel') {
+    const v = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.hypot(W, H) / 2);
+    v.addColorStop(0, 'rgba(0,229,255,0)'); v.addColorStop(1, `rgba(0,229,255,${0.22 * Math.min(1, zeitlupe)})`);
+    ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  }
+  if (blitz > 0) { ctx.fillStyle = `rgba(${blitzFarbe},${blitz * 0.5})`; ctx.fillRect(0, 0, W, H); }
+  if (zustand !== 'menue') hud();
+}
+function herzMalen(x, y, s, voll) {
+  ctx.save(); ctx.translate(x, y);
+  ctx.beginPath(); ctx.moveTo(0, s * 0.9);
+  ctx.bezierCurveTo(-s * 1.3, 0, -s * 0.65, -s * 1.05, 0, -s * 0.35);
+  ctx.bezierCurveTo(s * 0.65, -s * 1.05, s * 1.3, 0, 0, s * 0.9);
+  if (voll) { ctx.shadowColor = '#ff4f6d'; ctx.shadowBlur = 10; ctx.fillStyle = '#ff4f6d'; } else ctx.fillStyle = 'rgba(255,255,255,.16)';
+  ctx.fill(); ctx.restore();
+}
+function hud() {
+  const oben = OBEN;
+  ctx.save();
+  ctx.textAlign = 'center'; ctx.fillStyle = '#fff';
+  const gross = Math.round(klemm(U * 9, 30, 54));
+  ctx.shadowColor = welt.haupt; ctx.shadowBlur = 14;
+  ctx.font = `900 ${gross}px Orbitron, sans-serif`;
+  ctx.fillText(String(punkte), W / 2, oben + gross * 0.95);
+  ctx.shadowBlur = 0;
+  ctx.font = '700 12px Orbitron, sans-serif'; ctx.globalAlpha = 0.85;
+  if (welle > 0) {
+    const rest = feindeUebrig();
+    const zeile = welle % 5 === 0 ? `🌀 WELLE ${welle} · BOSS` : `WELLE ${welle}${rest && wellePhase === 'kampf' ? ' · NOCH ' + rest : ''}`;
+    ctx.fillText(endlos ? '♾️ ' + zeile : zeile, W / 2, oben + gross + 18);
+  }
+  ctx.globalAlpha = 1;
+  // Herzen und Bestwert links oben
+  for (let i = 0; i < Math.max(herzen, HERZEN_START); i++) herzMalen(24 + i * 22, oben + 16, 9, i < herzen);
+  ctx.textAlign = 'left'; ctx.font = '700 12px Orbitron, sans-serif'; ctx.globalAlpha = 0.6; ctx.fillStyle = '#fff';
+  ctx.fillText(`BEST ${Math.max(daten.best, punkte)}`, 14, oben + 46);
+  ctx.globalAlpha = 1;
+  // Aktive Extras rechts unter dem Pause-Knopf
+  let ey = oben + 62;
+  const extraZeile = (typ, anteil) => {
+    const E = EXTRAS[typ];
+    ctx.font = '18px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif'; ctx.textAlign = 'right'; ctx.fillStyle = '#fff';
+    ctx.fillText(E.zeichen, W - 14, ey + 6);
+    ctx.fillStyle = 'rgba(255,255,255,.15)'; ctx.fillRect(W - 84, ey - 2, 44, 6);
+    ctx.fillStyle = E.farbe; ctx.fillRect(W - 84, ey - 2, 44 * klemm(anteil, 0, 1), 6);
+    ey += 28;
+  };
+  if (zeitlupe > 0) extraZeile('zeit', zeitlupe / 5);
+  if (langSchweif > 0) extraZeile('schweif', langSchweif / 10);
+  if (kom.schild) extraZeile('schild', 1);
+  // Große Ansage (Welle, Boss …)
+  if (banner) {
+    ctx.textAlign = 'center'; ctx.globalAlpha = Math.min(1, banner.zeit / 0.5);
+    const gr = Math.round(klemm(U * 9, 28, 62));
+    ctx.font = `900 ${gr}px Orbitron, sans-serif`;
+    ctx.fillStyle = '#fff'; ctx.shadowColor = welt.haupt; ctx.shadowBlur = 24;
+    ctx.fillText(banner.text, W / 2, H * 0.4, W - 30);
+    if (banner.unter) { ctx.font = `700 ${Math.round(gr * 0.42)}px Orbitron, sans-serif`; ctx.shadowBlur = 12; ctx.fillText(banner.unter, W / 2, H * 0.4 + gr * 0.85, W - 30); }
+    ctx.shadowBlur = 0;
+  }
+  // Hinweis unten
+  if (hinweis) {
+    ctx.textAlign = 'center'; ctx.globalAlpha = Math.min(1, hinweis.zeit / 0.4);
+    const fs = Math.round(klemm(U * 3.6, 15, 20));
+    ctx.font = `700 ${fs}px Rajdhani, sans-serif`;
+    const tw = Math.min(W - 20, ctx.measureText(hinweis.text).width + 30), ty = H - 64 - fs;
+    ctx.fillStyle = 'rgba(7,81,138,.92)';
+    ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(W / 2 - tw / 2, ty, tw, fs + 18, 12); else ctx.rect(W / 2 - tw / 2, ty, tw, fs + 18); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle'; ctx.fillText(hinweis.text, W / 2, ty + (fs + 18) / 2 + 1, W - 34);
+  }
+  ctx.restore();
+}
+
+/* ---------------- Hauptschleife ---------------- */
+let letzte = performance.now(), rest = 0;
+const SCHRITT = 1 / 120;
+function schleife(jetzt) {
+  const dt = Math.min(0.05, (jetzt - letzte) / 1000);
+  letzte = jetzt; rest += dt;
+  while (rest >= SCHRITT) { aktualisieren(SCHRITT); rest -= SCHRITT; }
+  zeichnen();
+  requestAnimationFrame(schleife);
+}
+requestAnimationFrame(schleife);
+
+/* ---------------- Steuerung ---------------- */
+const istEingabe = el => !!(el && el.closest && el.closest('input, textarea, label'));   // Felder im Konto-Fenster
+window.addEventListener('pointerdown', e => {
+  if (e.target.closest && e.target.closest('button, input, label, a')) return;
+  if (zustand !== 'spiel') return;
+  e.preventDefault();
+  if (e.pointerType === 'mouse') { kom.zx = e.clientX / U; kom.zy = e.clientY / U; return; }
+  if (!finger) { finger = { id: e.pointerId, x: e.clientX, y: e.clientY }; kom.zx = kom.x; kom.zy = kom.y; }
+}, { passive: false });
+window.addEventListener('pointermove', e => {
+  if (zustand !== 'spiel') return;
+  if (e.pointerType === 'mouse') { kom.zx = e.clientX / U; kom.zy = e.clientY / U; return; }   // am PC: der Komet folgt der Maus
+  if (!finger || e.pointerId !== finger.id) return;
+  // auf dem Handy: der Komet macht die Wischbewegung nach (der Finger verdeckt ihn so nicht)
+  const dx = e.clientX - finger.x, dy = e.clientY - finger.y;
+  finger.x = e.clientX; finger.y = e.clientY;
+  kom.zx = klemm(kom.zx + dx / U * FINGER_FAKTOR, KOPF, AW - KOPF);
+  kom.zy = klemm(kom.zy + dy / U * FINGER_FAKTOR, KOPF, AH - KOPF);
+}, { passive: true });
+const fingerWeg = e => { if (finger && e.pointerId === finger.id) finger = null; };
+window.addEventListener('pointerup', fingerWeg);
+window.addEventListener('pointercancel', fingerWeg);
+const STEUER_TASTEN = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyW', 'KeyA', 'KeyS', 'KeyD'];
+window.addEventListener('keydown', e => {
+  if (istEingabe(e.target)) return;   // beim Tippen von Name und Passwort nichts abfangen
+  if (STEUER_TASTEN.includes(e.code)) { e.preventDefault(); tasten.add(e.code); }
+  if (e.repeat) return;
+  const aufKnopf = e.target && e.target.closest && e.target.closest('button');
+  if ((e.code === 'Space' || e.code === 'Enter') && !aufKnopf) {
+    e.preventDefault();
+    if (zustand === 'tot' && performance.now() - totZeit > 900) neuesSpiel();
+    else if (zustand === 'menue' && !$('menue').classList.contains('versteckt')) neuesSpiel();
+  }
+  if (e.code === 'KeyP' || e.code === 'Escape') { if (zustand === 'spiel') pause(true); else if (zustand === 'pause') pause(false); }
+});
+window.addEventListener('keyup', e => tasten.delete(e.code));
+window.addEventListener('blur', () => { tasten.clear(); finger = null; });
+document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
+window.addEventListener('contextmenu', e => { if (!istEingabe(e.target)) e.preventDefault(); });   // in den Feldern bleibt Einfügen möglich
+
+$('k-spielen').onclick = neuesSpiel;
+$('k-nochmal').onclick = neuesSpiel;
+$('k-go-menue').onclick = zumMenue;
+$('k-sieg-menue').onclick = zumMenue;
+$('k-pause-menue').onclick = zumMenue;
+$('k-weiter').onclick = () => pause(false);
+$('pause-knopf').onclick = () => pause(true);
+$('k-endlos').onclick = () => {
+  endlos = true; zustand = 'spiel'; zeigeEbene(null); musikStart();
+  teile = teile.filter(t => t.form !== 'konfetti');
+  wellePhase = 'pause'; pauseZeit = 1.2; banner = { text: 'ENDLOS!', zeit: 1.4 };
+};
+$('k-ton').onclick = () => { daten.ton = !daten.ton; sichern(); menueZeigen(); if (daten.ton) TON.extra(); };
+$('k-musik').onclick = () => { daten.musik = !daten.musik; sichern(); menueZeigen(); };
+$('k-hilfe').onclick = () => zeigeEbene('hilfe');
+$('k-hilfe-zu').onclick = menueZeigen;
+$('k-skins').onclick = () => { skinsZeigen(); zeigeEbene('skins'); };
+$('k-skins-zu').onclick = menueZeigen;
+function skinVorschau(c, s) {
+  const x = c.getContext('2d');
+  const M = 3.5, pts = [];   // eine kleine Schleife (wird beim Malen M-mal so groß)
+  for (let k = 0; k <= 36; k++) { const t = 0.9 + k / 36 * Math.PI * 1.7; pts.push({ x: (52 + Math.cos(t) * 30) / M, y: (60 + Math.sin(t) * 30) / M }); }
+  schweifMalen(x, pts, s, M);
+  const a = pts[pts.length - 1], b = pts[pts.length - 2];
+  kopf(x, s, a.x * M, a.y * M, 17, Math.atan2(a.y - b.y, a.x - b.x));
+}
+function skinsZeigen() {
+  const r = $('skin-raster');
+  r.innerHTML = '';
+  for (const s of SKINS) {
+    const frei = skinFrei(s);
+    const b = document.createElement('button');
+    b.className = 'skin' + (aktuellerSkin().id === s.id ? ' an' : '') + (frei ? '' : ' zu');
+    const c = document.createElement('canvas'); c.width = 112; c.height = 112;
+    if (frei) skinVorschau(c, s);
+    else { const x = c.getContext('2d'); x.font = '48px sans-serif'; x.textAlign = 'center'; x.fillText('🔒', 56, 74); }
+    b.appendChild(c);
+    b.appendChild(document.createTextNode(s.name));
+    const klein = document.createElement('small');
+    klein.textContent = frei ? (aktuellerSkin().id === s.id ? 'ausgewählt' : 'antippen') : (s.nurSieg ? 'für den Sieg' : `ab ${s.ab} Punkten`);
+    b.appendChild(klein);
+    if (frei) b.onclick = () => { daten.skin = s.id; sichern(); skinsZeigen(); TON.skin(); };
+    r.appendChild(b);
+  }
+}
+
+/* ---------------- Vorix-Konto: Anmelden und Abmelden (genau wie in Spotter und Jump over the Wall) ----------------
+   Ibo wollte am 07.10.2026: „mach für jedes Spiel Vorix-Konto". Erlaubt ist dasselbe wie bei Spotter
+   (Papa, Kennung ZC8): NUR Anmelden und den Namen anzeigen. Vorix Loop speichert NICHTS auf dem Server,
+   Bestwert und Skins bleiben auf dem Gerät.
+   WICHTIG – nicht ändern:
+    - speicherName: Vorix Loop hat seine EIGENE Sitzung. Nie den Sitzungs-Schlüssel von Timer Challenge (sb-…)
+      benutzen, sonst kann ein Abmelden hier Timer Challenge durcheinanderbringen.
+    - domain und Namensregel: genau wie in Timer Challenge, sonst passen die Konten nicht zusammen.
+    - Abmelden nur mit scope 'local'. Ohne das wäre man auch in Timer Challenge abgemeldet, auf allen Geräten.
+    - Vorix Loop legt keine Konten an und löscht keine. Das macht nur Timer Challenge.
+   ------------------------------------------------------------------------------------------- */
+const KONTO = {
+  url: 'https://ygdgqpedwdpbxlicviks.supabase.co',
+  schluessel: 'sb_publishable_QtZnXFRDB8ypHHmOuY-qLg_MI-52tM5',   // öffentlicher Schlüssel, darf im Code stehen
+  bibliothek: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2',
+  speicherName: 'vorixLoopKonto',
+  domain: '@spieler.kronix-timer.app',
+  timerAdresse: 'https://ibralox37.github.io/Timer-/',
+};
+let sb = null;   // Verbindung zum Vorix-Server. Wird erst geladen, wenn jemand das Konto benutzt.
+function skriptLaden(src) {
+  return new Promise((ok, fehler) => {
+    const s = document.createElement('script');
+    s.src = src; s.async = true; s.crossOrigin = 'anonymous';
+    s.onload = ok; s.onerror = () => fehler(new Error('Konnte nicht laden: ' + src));
+    document.head.appendChild(s);
+  });
+}
+async function kontoClient() {
+  if (sb) return sb;
+  if (!window.supabase) await skriptLaden(KONTO.bibliothek);
+  sb = window.supabase.createClient(KONTO.url, KONTO.schluessel, {
+    auth: { storageKey: KONTO.speicherName, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+  });
+  return sb;
+}
+// Genau dieselbe Regel wie in Timer Challenge: Leerzeichen weg, 3–20 Zeichen, dann kleinschreiben + Domain
+const nameGueltig = name => /^[a-zA-Z0-9_]{3,20}$/.test(name);
+const nameZuMail = name => name.toLowerCase() + KONTO.domain;
+
+async function kontoAnmelden(eingabeName, passwort) {
+  const name = String(eingabeName || '').trim();
+  if (!nameGueltig(name)) throw new Error('name');
+  if (String(passwort || '').length < 6) throw new Error('passwort');
+  const c = await kontoClient();
+  const { data, error } = await c.auth.signInWithPassword({ email: nameZuMail(name), password: passwort });
+  if (error) throw error;
+  const id = data.user.id;
+  // Den echten Namen (mit Groß- und Kleinschreibung) aus dem Profil holen und prüfen, ob das Konto gesperrt ist (nur lesen)
+  let echterName = name, gesperrt = false, grund = '';
+  try {
+    let antwort = await c.from('profiles').select('username,banned,ban_reason').eq('id', id).maybeSingle();
+    if (antwort.error) antwort = await c.from('profiles').select('username').eq('id', id).maybeSingle();
+    if (antwort.data) {
+      echterName = antwort.data.username || name;
+      gesperrt = antwort.data.banned === true;
+      grund = antwort.data.ban_reason || '';
+    }
+  } catch (e) { /* dann bleibt der eingegebene Name */ }
+  if (gesperrt) {
+    try { await c.auth.signOut({ scope: 'local' }); } catch (e) {}
+    const f = new Error('gesperrt'); f.grund = grund; throw f;
+  }
+  daten.konto = { id, name: String(echterName).slice(0, 20) };
+  sichern();
+}
+async function kontoAbmelden() {
+  try { const c = await kontoClient(); await c.auth.signOut({ scope: 'local' }); } catch (e) { /* offline – egal */ }
+  try { localStorage.removeItem(KONTO.speicherName); } catch (e) {}   // nur UNSERE Sitzung, nie die von Timer Challenge
+  delete daten.konto;
+  sichern();
+}
+// Nachsehen, ob die Anmeldung noch gilt. Ohne Internet bleibt der Name einfach stehen.
+// Läuft nie mitten im Spiel, damit das Laden nicht ruckelt.
+function kontoSpaeterPruefen() {
+  if (!daten.konto || !navigator.onLine) return;
+  if (zustand === 'spiel' || zustand === 'pause') { setTimeout(kontoSpaeterPruefen, 3000); return; }
+  kontoClient()
+    .then(c => c.auth.getSession())
+    .then(({ data }) => {
+      if (!data.session) { delete daten.konto; sichern(); if (zustand === 'menue') menueZeigen(); }
+    })
+    .catch(() => { /* Server nicht erreichbar – Name bleibt stehen */ });
+}
+function kontoFehlerText(e) {
+  const m = String((e && (e.message || e.code)) || '');
+  if (m === 'name') return 'Der Name hat 3 bis 20 Zeichen: Buchstaben, Zahlen oder _ (so wie bei Timer Challenge).';
+  if (m === 'passwort') return 'Das Passwort hat mindestens 6 Zeichen.';
+  if (m === 'gesperrt') return '⛔ Dieses Konto ist gesperrt.' + (e.grund ? ' Grund: ' + e.grund : '');
+  if (/invalid login credentials|invalid_credentials/i.test(m)) return 'Name oder Passwort stimmt nicht.';
+  if (/rate limit|too many/i.test(m)) return 'Zu viele Versuche. Warte kurz und versuch es dann nochmal.';
+  if (/fetch|network|load failed|konnte nicht laden/i.test(m)) return 'Keine Verbindung zum Vorix-Server. Ist das Internet an?';
+  return 'Das hat nicht geklappt. Versuch es gleich nochmal.';
+}
+function kontoZeigen() {
+  const an = !!daten.konto;
+  $('konto-aus').classList.toggle('versteckt', an);
+  $('konto-an').classList.toggle('versteckt', !an);
+  $('k-fehler').textContent = '';
+  $('k-passwort').value = '';
+  if (an) $('k-angemeldet').textContent = daten.konto.name;
+  zeigeEbene('konto');
+  if (!an && window.matchMedia('(pointer: fine)').matches) setTimeout(() => $('k-name').focus(), 250);   // am PC gleich lostippen
+}
+async function kontoLos() {
+  const knopf = $('k-anmelden');
+  if (knopf.disabled) return;
+  $('k-fehler').textContent = '';
+  knopf.disabled = true; knopf.textContent = 'PRÜFE …';
+  try {
+    await kontoAnmelden($('k-name').value, $('k-passwort').value);
+    $('k-passwort').value = '';
+    TON.skin();
+    kontoZeigen();
+  } catch (e) {
+    console.warn('Anmeldung:', e);
+    $('k-fehler').textContent = kontoFehlerText(e);
+  } finally {
+    knopf.disabled = false; knopf.textContent = 'ANMELDEN';
+  }
+}
+$('konto-knopf').onclick = kontoZeigen;
+$('konto-aus').addEventListener('submit', e => { e.preventDefault(); kontoLos(); });   // Knopf ANMELDEN oder Enter im Passwort-Feld
+$('k-name').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('k-passwort').focus(); } });
+$('k-konto-zu').onclick = () => { $('k-passwort').value = ''; menueZeigen(); };
+$('k-konto-fertig').onclick = menueZeigen;
+$('k-abmelden').onclick = async () => { await kontoAbmelden(); kontoZeigen(); };
+$('k-timer').onclick = () => window.open(KONTO.timerAdresse, '_blank', 'noopener');
+
+// Web-App: Service Worker nur im Internet (https) oder auf dem Test-Rechner
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+menueZeigen();
+setTimeout(kontoSpaeterPruefen, 1500);   // gilt die Anmeldung mit dem Vorix-Konto noch?
+</script>
+</body>
+</html>
