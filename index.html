@@ -2,6 +2,9 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<!-- Sicherheit (08.10.2026): Das Spiel darf nur von diesen Adressen etwas laden. Neue Adresse noetig? Hier eintragen. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://ygdgqpedwdpbxlicviks.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Vorix Loop – ein Spiel von VORIX</title>
 <meta name="description" content="Vorix Loop von VORIX: Zieh mit deinem Kometen Kreise um die Gegner und fang sie ein. Je mehr in einem Kreis, desto mehr Punkte! Mit Wellen, Bossen und Skins. Kostenlos im Browser und auf dem Handy.">
@@ -1174,7 +1177,9 @@ function schweifMalen(c, pts, skin, u) {
     c.beginPath(); c.moveTo(pts[i].x * u, pts[i].y * u);
     for (let k = i + 1; k <= ende; k++) c.lineTo(pts[k].x * u, pts[k].y * u);
     c.strokeStyle = mischFarbe(skin, t);
+    c.globalCompositeOperation = 'lighter';                                           // Leuchten addiert sich (echtes Neon)
     c.globalAlpha = 0.16 * t; c.lineWidth = (1.4 + 2.4 * t) * u; c.stroke();        // Leuchten
+    c.globalCompositeOperation = 'source-over';
     c.globalAlpha = 0.3 + 0.7 * t; c.lineWidth = (0.35 + 0.65 * t) * u; c.stroke();  // heller Kern
   }
   c.restore();
@@ -1264,20 +1269,60 @@ function gegnerMalen(c, g, x, y, r) {
   if (g.blitz > 0 && g.typ !== 'boss') { c.globalAlpha = 0.7; c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, r, 0, ZWEI_PI); c.fill(); }
   c.restore();
 }
+// Grafik-Verbesserung 08.10.2026: Der feste Teil des Hintergrunds (Farbverlauf, Gitter, großes X) wird pro Welt
+// einmal vorgemalt und dann nur noch kopiert. Das spart auf dem Handy viel Rechenzeit.
+const hgSpeicher = new Map();
+let hgGroesse = '';
+function hexA(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; }   // '#rrggbb' → rgba
+function hgBild(w) {
+  const schluessel = W + 'x' + H + 'x' + U;
+  if (hgGroesse !== schluessel) { hgSpeicher.clear(); hgGroesse = schluessel; }
+  let c = hgSpeicher.get(w);
+  if (c) return c;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2), rand = 30;
+  c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round((W + rand * 2) * dpr)); c.height = Math.max(1, Math.round((H + rand * 2) * dpr));
+  const x = c.getContext('2d');
+  x.setTransform(dpr, 0, 0, dpr, rand * dpr, rand * dpr);
+  const gr = x.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.hypot(W, H) / 2);
+  gr.addColorStop(0, w.bg[1]); gr.addColorStop(1, w.bg[0]);
+  x.fillStyle = gr; x.fillRect(-rand, -rand, W + rand * 2, H + rand * 2);
+  x.strokeStyle = w.haupt; x.globalAlpha = 0.07; x.lineWidth = 1;          // Gitter
+  const a = 10 * U; x.beginPath();
+  for (let gx = (W / 2) % a; gx < W; gx += a) { x.moveTo(gx, 0); x.lineTo(gx, H); }
+  for (let gy = (H / 2) % a; gy < H; gy += a) { x.moveTo(0, gy); x.lineTo(W, gy); }
+  x.stroke();
+  x.globalAlpha = 0.05; x.lineWidth = 7 * U; x.lineCap = 'round';           // großes X in der Mitte – das Vorix-Zeichen
+  const s = 22 * U; x.beginPath();
+  x.moveTo(W / 2 - s, H / 2 - s); x.lineTo(W / 2 + s, H / 2 + s); x.moveTo(W / 2 + s, H / 2 - s); x.lineTo(W / 2 - s, H / 2 + s); x.stroke();
+  hgSpeicher.set(w, c);
+  return c;
+}
+let vignette = null, vignetteGroesse = '';
+function vignetteBild() {
+  const schluessel = W + 'x' + H;
+  if (vignette && vignetteGroesse === schluessel) return vignette;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  vignette = document.createElement('canvas');
+  vignette.width = Math.max(1, Math.round(W * dpr)); vignette.height = Math.max(1, Math.round(H * dpr));
+  const x = vignette.getContext('2d');
+  x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const g = x.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.38, W / 2, H / 2, Math.hypot(W, H) / 2);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.45)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  vignetteGroesse = schluessel;
+  return vignette;
+}
+const nebel = [{ x: 0.2, y: 0.3, r: 0.5, v: 0.09, p: 0 }, { x: 0.8, y: 0.7, r: 0.55, v: 0.07, p: 2.5 }];
+const wenigBewegung = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;   // dann kein Wackeln
 function hintergrund() {
-  const gr = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.hypot(W, H) / 2);
-  gr.addColorStop(0, welt.bg[1]); gr.addColorStop(1, welt.bg[0]);
-  ctx.fillStyle = gr; ctx.fillRect(-30, -30, W + 60, H + 60);
-  // Gitter
-  ctx.strokeStyle = welt.haupt; ctx.globalAlpha = 0.07; ctx.lineWidth = 1;
-  const a = 10 * U; ctx.beginPath();
-  for (let x = (W / 2) % a; x < W; x += a) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
-  for (let y = (H / 2) % a; y < H; y += a) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
-  ctx.stroke();
-  // großes X in der Mitte – das Vorix-Zeichen
-  ctx.globalAlpha = 0.05; ctx.lineWidth = 7 * U; ctx.lineCap = 'round';
-  const s = 22 * U; ctx.beginPath();
-  ctx.moveTo(W / 2 - s, H / 2 - s); ctx.lineTo(W / 2 + s, H / 2 + s); ctx.moveTo(W / 2 + s, H / 2 - s); ctx.lineTo(W / 2 - s, H / 2 + s); ctx.stroke();
+  ctx.drawImage(hgBild(welt), -30, -30, W + 60, H + 60);
+  for (const n of nebel) {                                   // leuchtende Nebel ziehen langsam
+    const r = Math.max(W, H) * n.r, cx = (n.x + 0.08 * Math.sin(uhr * n.v + n.p)) * W, cy = (n.y + 0.06 * Math.cos(uhr * n.v * 0.8 + n.p)) * H;
+    const ng = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    ng.addColorStop(0, hexA(welt.haupt, 0.09)); ng.addColorStop(1, hexA(welt.haupt, 0));
+    ctx.fillStyle = ng; ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+  }
   // Sterne
   ctx.fillStyle = '#fff';
   for (const st of sterne) { ctx.globalAlpha = 0.2 + 0.5 * (0.5 + 0.5 * Math.sin(uhr * st.v + st.p)); ctx.fillRect(st.x * W, st.y * H, st.r, st.r); }
@@ -1287,7 +1332,7 @@ function hintergrund() {
 }
 function zeichnen() {
   ctx.save();
-  if (wackeln > 0) ctx.translate((Math.random() - 0.5) * U * wackeln * 4, (Math.random() - 0.5) * U * wackeln * 4);
+  if (wackeln > 0 && !wenigBewegung) ctx.translate((Math.random() - 0.5) * U * wackeln * 4, (Math.random() - 0.5) * U * wackeln * 4);
   hintergrund();
   // eingefangene Flächen leuchten kurz auf
   for (const f of flaechen) {
@@ -1340,12 +1385,14 @@ function zeichnen() {
   // Partikel
   for (const t of teile) {
     ctx.globalAlpha = Math.max(0, Math.min(1, t.leben));
+    ctx.globalCompositeOperation = t.form === 'konfetti' ? 'source-over' : 'lighter';   // Funken leuchten, Konfetti nicht
     ctx.fillStyle = t.farbe; ctx.strokeStyle = t.farbe;
     const x = t.x * U, y = t.y * U, gr = t.groesse * U;
     if (t.form === 'ring') { ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, gr * (1.6 - t.leben), 0, ZWEI_PI); ctx.stroke(); }
     else if (t.form === 'konfetti') { ctx.save(); ctx.translate(x, y); ctx.rotate(t.y * 0.3); ctx.fillRect(-gr / 2, -gr / 4, gr, gr / 2); ctx.restore(); }
     else { ctx.beginPath(); ctx.arc(x, y, gr, 0, ZWEI_PI); ctx.fill(); }
   }
+  ctx.globalCompositeOperation = 'source-over';
   ctx.globalAlpha = 1;
   // Punkte und Combos
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -1365,6 +1412,7 @@ function zeichnen() {
     ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
   }
   if (blitz > 0) { ctx.fillStyle = `rgba(${blitzFarbe},${blitz * 0.5})`; ctx.fillRect(0, 0, W, H); }
+  ctx.drawImage(vignetteBild(), 0, 0, W, H);                 // Rand etwas dunkler, lenkt den Blick in die Mitte
   if (zustand !== 'menue') hud();
 }
 function herzMalen(x, y, s, voll) {
@@ -1545,22 +1593,24 @@ const KONTO = {
   url: 'https://ygdgqpedwdpbxlicviks.supabase.co',
   schluessel: 'sb_publishable_QtZnXFRDB8ypHHmOuY-qLg_MI-52tM5',   // öffentlicher Schlüssel, darf im Code stehen
   bibliothek: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2',
+  pruefsumme: 'sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF',   // Fingerabdruck: der Browser laedt die Datei nur, wenn sie genau diese ist (neue Version = neuer Fingerabdruck)
   speicherName: 'vorixLoopKonto',
   domain: '@spieler.kronix-timer.app',
   timerAdresse: 'https://ibralox37.github.io/Timer-/',
 };
 let sb = null;   // Verbindung zum Vorix-Server. Wird erst geladen, wenn jemand das Konto benutzt.
-function skriptLaden(src) {
+function skriptLaden(src, pruefsumme) {
   return new Promise((ok, fehler) => {
     const s = document.createElement('script');
     s.src = src; s.async = true; s.crossOrigin = 'anonymous';
+    if (pruefsumme) s.integrity = pruefsumme;
     s.onload = ok; s.onerror = () => fehler(new Error('Konnte nicht laden: ' + src));
     document.head.appendChild(s);
   });
 }
 async function kontoClient() {
   if (sb) return sb;
-  if (!window.supabase) await skriptLaden(KONTO.bibliothek);
+  if (!window.supabase) await skriptLaden(KONTO.bibliothek, KONTO.pruefsumme);
   sb = window.supabase.createClient(KONTO.url, KONTO.schluessel, {
     auth: { storageKey: KONTO.speicherName, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
   });
