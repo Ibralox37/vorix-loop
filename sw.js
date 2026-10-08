@@ -9,7 +9,8 @@
    nie anfassen!
    ===================================================================== */
 
-const SPIEL = 'vorix-loop-spiel-2';      // bei jeder neuen Version die Zahl erhöhen (2 = Start-Fenster Konto/Gast, 08.10.2026)
+const SPIEL = 'vorix-loop-spiel-3';      // 3 = neue Grafik und Schutzregeln, 08.10.2026
+// (2 = Start-Fenster Konto/Gast)
 const SCHRIFT = 'vorix-loop-schrift-1';  // Schriftarten
 const DATEIEN = ['./', './index.html', './manifest.json', './vorix-logo-hell.png',
   './favicon.png', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
